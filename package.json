@@ -1,0 +1,76 @@
+{
+  "name": "mini-kode",
+  "version": "0.1.0",
+  "description": "An educational AI coding assistant CLI tool for learning modern AI coding assistant systems",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "mini-kode": "./dist/index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minmaxflow/mini-kode.git"
+  },
+  "homepage": "https://github.com/minmaxflow/mini-kode#readme",
+  "license": "MIT",
+  "author": "minmaxflow <minmaxflow@gmail.com>",
+  "keywords": [
+    "ai",
+    "coding-assistant",
+    "cli",
+    "educational",
+    "llm",
+    "typescript",
+    "openai",
+    "automation",
+    "tool-system"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "main": "./dist/index.mjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/minmaxflow/mini-kode/issues"
+  },
+  "scripts": {
+    "dev": "DEV=true bun --watch run src/index.ts",
+    "build": "bun build src/index.ts --minify --outfile dist/index.mjs --target=node",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prepublishOnly": "pnpm run build && pnpm run test",
+    "postpublish": "git tag v$(npm pkg get version | tr -d '\"') && git push origin v$(npm pkg get version | tr -d '\"')"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^12.1.0",
+    "diff": "^8.0.2",
+    "fuzzysort": "^3.1.0",
+    "glob": "^11.0.3",
+    "ink": "^6.3.1",
+    "marked": "^16.0.0",
+    "openai": "^5.23.1",
+    "pino": "^9.3.2",
+    "pino-pretty": "^13.1.1",
+    "react": "^19.1.1",
+    "react-devtools-core": "^6.1.2",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.24.6"
+  },
+  "devDependencies": {
+    "@types/diff": "^8.0.0",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.15",
+    "ink-testing-library": "^4.0.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
