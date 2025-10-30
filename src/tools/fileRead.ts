@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { z } from "zod";
 
-import { debugLog } from "../logging";
 import { isPathUnderPrefix } from "../permissions";
 import { Tool, FileReadResult, ToolExecutionContext } from "./types";
 import { noteFileReadForEdit } from "./fileEdit";
@@ -69,14 +68,10 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
         };
 
       // Security note: As a readonly tool, fileRead does not require permission approval.
-      // However, we log a warning when reading files outside the project directory
+      // However, we check if reading files outside the project directory
       // to help users be aware of potential security implications.
       if (!isPathUnderPrefix(absolute, context.cwd)) {
-        debugLog("fileRead.outside_project", {
-          filePath: absolute,
-          cwd: context.cwd,
-          message: "Reading file outside project directory",
-        });
+        // File is outside project directory - continue reading but note security consideration
       }
 
       if (context.signal?.aborted)

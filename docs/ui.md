@@ -147,4 +147,3 @@ The UI is built with React components using Ink:
 - [System Architecture](./architecture.md) - How UI integrates with the agent layer
 - [LLM Tool Integration](./llm-tool-integration.md) - Message processing in the agent loop
 - [Permission System](./permission.md) - Security model and approval modes
-- [Trace Logging](./trace.md) - Debugging UI interactions and command execution

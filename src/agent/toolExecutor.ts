@@ -8,14 +8,6 @@
  * the core agent loop and the permission-based tool execution.
  */
 
-import {
-  traceToolPermissionGranted,
-  traceToolPermissionRequired,
-  traceToolResult,
-  traceToolStart,
-  traceUserApproval,
-  traceUserRejection,
-} from "../logging/traceLogger";
 import { applyPermissionGrant } from "../tools/permissionRequest";
 import { runToolBatchConcurrent, executeSingleToolCall } from "../tools/runner";
 import { ToolExecutionContext, TOOLS_BY_NAME } from "../tools";
@@ -159,7 +151,6 @@ async function executeToolsConcurrently(
       ...toolCall,
       status: "executing" as const,
     });
-    traceToolStart(toolCall.requestId, toolCall.toolName, toolCall.input);
   }
 
   // Execute tools concurrently and process results immediately for progressive UI updates
@@ -189,7 +180,6 @@ async function executeToolsConcurrently(
     // This ensures the UI gets the terminal state update
     // Type assertion: concurrent execution should only return terminal states
     callbacks.onToolComplete?.(result as ToolCallTerminal);
-    traceToolResult(result.requestId, result.toolName, result);
   }
 
   return results;
@@ -227,11 +217,6 @@ async function executeToolsSequentially(
         results[j] = abortedResult;
         // Notify UI about abort
         callbacks.onToolComplete?.(abortedResult as ToolCallTerminal);
-        traceToolResult(
-          abortedResult.requestId,
-          abortedResult.toolName,
-          abortedResult,
-        );
       }
       break;
     }
@@ -242,11 +227,6 @@ async function executeToolsSequentially(
       ...toolCallToExecute,
       status: "executing" as const,
     });
-    traceToolStart(
-      toolCallToExecute.requestId,
-      toolCallToExecute.toolName,
-      toolCallToExecute.input,
-    );
 
     // Execute single tool
     const result = await executeSingleToolWithPermission(
@@ -259,11 +239,6 @@ async function executeToolsSequentially(
     // Call onToolComplete for the final result
     // This ensures the UI gets the terminal state update
     callbacks.onToolComplete?.(result as ToolCallTerminal);
-    traceToolResult(
-      toolCallToExecute.requestId,
-      toolCallToExecute.toolName,
-      result,
-    );
 
     // If permission was denied, stop execution and mark remaining tools as permission_denied
     if (result.status === "permission_denied") {
@@ -282,11 +257,6 @@ async function executeToolsSequentially(
         results[j] = deniedResult;
         // Notify UI about permission denied
         callbacks.onToolComplete?.(deniedResult as ToolCallTerminal);
-        traceToolResult(
-          deniedResult.requestId,
-          deniedResult.toolName,
-          deniedResult,
-        );
       }
       break;
     }
@@ -342,11 +312,6 @@ async function handlePermissionRequest(
   callbacks: ExecutionCallbacks,
 ): Promise<ToolCall> {
   const uiHint = toolCallToExecute.uiHint!;
-  traceToolPermissionRequired(
-    toolCallToExecute.requestId,
-    toolCallToExecute.toolName,
-    uiHint,
-  );
 
   if (!callbacks.onPermissionRequired) {
     // No callback available, return permission_denied status
@@ -372,7 +337,6 @@ async function handlePermissionRequest(
     toolCallToExecute.requestId,
   );
   if (!decision.approved) {
-    traceUserRejection(toolCallToExecute.requestId);
     // Return permission_denied status instead of throwing
     return {
       ...toolCallToExecute,
@@ -382,14 +346,7 @@ async function handlePermissionRequest(
     };
   }
 
-  traceUserApproval(toolCallToExecute.requestId, decision.option);
-
   await applyPermissionGrant(uiHint, decision.option, toolContext.cwd);
-  traceToolPermissionGranted(
-    toolCallToExecute.requestId,
-    toolCallToExecute.toolName,
-    decision.option,
-  );
 
   // Update UI to show tool is now executing (after permission granted)
   // This ensures users see the transition from permission prompt to execution

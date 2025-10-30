@@ -3,7 +3,6 @@ import path from "path";
 
 import { FileEntry } from "./types";
 import { isTextFile } from "./utils";
-import { debugLog } from "../logging";
 
 /**
  * Directories to skip during scanning
@@ -136,8 +135,7 @@ export class FileScanner {
       }
     } catch (err) {
       // Gracefully handle permission errors or other file system issues
-      // Log warning but continue scanning other directories
-      debugLog(`Failed to scan ${dir}:`, { err });
+      // Continue scanning other directories despite errors
     }
 
     return entries;

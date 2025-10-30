@@ -92,13 +92,7 @@ import {
 import type { Session } from "../sessions/types";
 import { wrapAsLLMMessage } from "../sessions/types";
 import { formatToolResultMessage } from "./formatters";
-import {
-  traceAgentStart,
-  traceAgentEnd,
-  traceLLMRequest,
-  traceLLMResponse,
-  traceAgentError,
-} from "../logging/traceLogger";
+
 import { executeToolsWithPermission } from "./toolExecutor";
 import { allToolsToOpenAIFormat } from "../tools/openai";
 import { ALL_TOOLS } from "../tools";
@@ -294,9 +288,6 @@ export async function executeAgent(
 
   const openaiTools = allToolsToOpenAIFormat(ALL_TOOLS);
 
-  // Start agent trace
-  traceAgentStart(sessionId);
-
   try {
     let iteration = 0;
 
@@ -313,9 +304,6 @@ export async function executeAgent(
         const errorMessage = `Message validation failed: ${validation.errors.join("; ")}`;
         throw new Error(errorMessage);
       }
-
-      // Trace LLM request
-      traceLLMRequest(conversationHistory);
 
       // Stream LLM response
       const stream = streamChatCompletion(client, conversationHistory, {
@@ -376,8 +364,6 @@ export async function executeAgent(
       // Get parsed tool calls directly from streaming response
       const parsedCalls = lastResponse?.parsedToolCalls || [];
 
-      traceLLMResponse(assembled, parsedCalls, finishReason);
-
       // Update token usage from the LLM response
       if (
         lastResponse?.tokenUsage &&
@@ -427,7 +413,6 @@ export async function executeAgent(
         if (hasPermissionDenied) {
           // Ensure UI state is updated when execution ends due to permission denied
           callbacks.onGeneratingChange?.(false);
-          traceAgentEnd(sessionId, "Rejected by user", "permission_denied");
           return {
             success: false,
             error: {
@@ -465,9 +450,6 @@ export async function executeAgent(
         );
       }
 
-      // End agent trace
-      traceAgentEnd(sessionId, assembled, "completed");
-
       // Ensure UI state is updated when LLM generation completes successfully
       callbacks.onGeneratingChange?.(false);
 
@@ -490,9 +472,6 @@ export async function executeAgent(
     } else if (err instanceof OpenAIError) {
       errorType = "llm_error";
     }
-
-    // 2. Log with traceAgentEnd
-    traceAgentError(sessionId, errorType, err);
 
     // 3. Call callbacks.onGeneratingChange to ensure UI state is updated
     // This is especially important for aborts to ensure isLLMGenerating is set to false

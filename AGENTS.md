@@ -14,6 +14,7 @@
 ## Architecture
 
 ### Core Design
+
 - **Tool Pattern**: All tools implement `Tool<Input, Output>` interface
 - **Concurrency**: Readonly tools execute concurrently, writing tools sequentially
 - **Streaming**: LLM responses stream progressively
@@ -21,6 +22,7 @@
 - **Dual Mode**: Interactive UI and non-interactive execution
 
 ### Key Modules
+
 - **Tools** (`src/tools/`): Tool system with concurrency control
 - **Permissions** (`src/permissions/`): Two-layer permission system
 - **LLM** (`src/llm/`): Streaming client and tool integration
@@ -41,6 +43,7 @@ pnpm run format   # Format code with Prettier
 ## Code Style Guidelines
 
 ### Import Organization
+
 1. Node.js built-in libraries (`fs`, `path`, `os`, `crypto`)
 2. Third-party libraries (`react`, `ink`, `chalk`, `zod`, `openai`)
 3. Relative file imports (`./types`, `../utils`)
@@ -48,11 +51,13 @@ pnpm run format   # Format code with Prettier
 Each section separated by a blank line, alphabetically sorted within sections.
 
 ### Code Formatting
+
 - Use `pnpm run format` to format all TypeScript/TSX and Markdown files
 - Ensure all generated code follows import organization rules
 - Run format command before committing changes
 
 ### Comment Language
+
 All comments must be in English for consistency.
 
 ## Key Features

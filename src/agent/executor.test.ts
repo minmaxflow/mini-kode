@@ -55,21 +55,6 @@ vi.mock("../tools/runner", () => ({
   executeSingleToolCall: vi.fn(),
 }));
 
-vi.mock("../logging/traceLogger", () => ({
-  traceAgentStart: vi.fn(),
-  traceAgentEnd: vi.fn(),
-  traceAgentError: vi.fn(),
-  traceIteration: vi.fn(),
-  traceLLMRequest: vi.fn(),
-  traceLLMResponse: vi.fn(),
-  traceToolStart: vi.fn(),
-  traceToolPermissionRequired: vi.fn(),
-  traceToolPermissionGranted: vi.fn(),
-  traceToolResult: vi.fn(),
-  traceUserApproval: vi.fn(),
-  traceUserRejection: vi.fn(),
-}));
-
 describe("AgentExecutor", () => {
   beforeEach(() => {
     vi.clearAllMocks();

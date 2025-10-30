@@ -21,7 +21,6 @@ Mini-Code is an **educational AI coding assistant** that demonstrates how modern
 | [Permission](./permission.md)                     | Multi-layer permission system                     | Security        |
 | [LLM Tool Integration](./llm-tool-integration.md) | Complete integration flow                         | Coordination    |
 | [User Interface](./ui.md)                         | UI components, state management, and interactions | User Experience |
-| [Trace Logging](./trace.md)                       | Debugging and observability                       | Troubleshooting |
 
 ## Key Learning Concepts
 

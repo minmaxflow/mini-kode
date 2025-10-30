@@ -17,9 +17,6 @@ importers:
       diff:
         specifier: ^8.0.2
         version: 8.0.2
-      dotenv:
-        specifier: ^17.2.2
-        version: 17.2.3
       fuzzysort:
         specifier: ^3.1.0
         version: 3.1.0
@@ -54,15 +51,15 @@ importers:
         specifier: ^3.24.6
         version: 3.24.6(zod@3.25.76)
     devDependencies:
-      '@types/diff':
-        specifier: ^8.0.0
-        version: 8.0.0
       '@types/node':
         specifier: ^24.5.2
         version: 24.8.1
       '@types/react':
         specifier: ^19.1.15
         version: 19.2.2
+      esbuild:
+        specifier: ^0.25.11
+        version: 0.25.11
       ink-testing-library:
         specifier: ^4.0.0
         version: 4.0.0(@types/react@19.2.2)
@@ -372,10 +369,6 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
-  '@types/diff@8.0.0':
-    resolution: {integrity: sha512-o7jqJM04gfaYrdCecCVMbZhNdG6T1MHg/oQoRFdERLV+4d+V7FijhiEAbFu0Usww84Yijk9yH58U4Jk4HbtzZw==}
-    deprecated: This is a stub types definition. diff provides its own type definitions, so you do not need this installed.
-
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
@@ -522,10 +515,6 @@ packages:
   diff@8.0.2:
     resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
     engines: {node: '>=0.3.1'}
-
-  dotenv@17.2.3:
-    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
-    engines: {node: '>=12'}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -1250,10 +1239,6 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
-  '@types/diff@8.0.0':
-    dependencies:
-      diff: 8.0.2
-
   '@types/estree@1.0.8': {}
 
   '@types/node@24.8.1':
@@ -1384,8 +1369,6 @@ snapshots:
   deep-eql@5.0.2: {}
 
   diff@8.0.2: {}
-
-  dotenv@17.2.3: {}
 
   eastasianwidth@0.2.0: {}
 

@@ -45,7 +45,7 @@ Tool Results
 │ Infrastructure  │ ← Supporting systems
 │  - Config       │   Settings & approval modes
 │  - Permissions  │   Security policies
-│  - Logging      │   Trace & debug logs
+
 └─────────────────┘
 ```
 
@@ -122,7 +122,6 @@ Tool Results
 
 - **Configuration**: Project and global settings with approval modes (see [Configuration](./config.md))
 - **Permission System**: Multi-layer security with project + session policies (see [Permission System](./permission.md))
-- **Logging**: Structured trace logging for debugging and learning
 
 ## Key Architectural Patterns
 
@@ -191,7 +190,6 @@ User: "Update all TypeScript interfaces to include JSDoc comments"
 - Clear separation of concerns
 - Well-documented interfaces
 - Minimal dependencies
-- Comprehensive logging
 
 ### 2. Real-World Patterns
 

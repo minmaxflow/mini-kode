@@ -9,10 +9,10 @@ export interface BashResultViewProps {
 export function BashResultView({ result }: BashResultViewProps) {
   const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
 
-  if (output) {
+  if (output.trim()) {
     const lines = output.trim().split("\n");
-    const isTruncated = lines.length > 3;
-    const displayLines = isTruncated ? lines.slice(0, 2) : lines.slice(0, 3);
+    const isTruncated = lines.length > 6;
+    const displayLines = isTruncated ? lines.slice(0, 5) : lines.slice(0, 6);
 
     return (
       <Box flexDirection="column">

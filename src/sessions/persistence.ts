@@ -1,7 +1,26 @@
 import fs from "fs";
+import path from "path";
+import os from "os";
 
-import { getSessionJsonPath } from "../logging/paths";
 import type { Session } from "./types";
+
+/**
+ * Get the path for session JSON file
+ */
+function getSessionJsonPath(sessionId: string): string {
+  const configDir = path.join(os.homedir(), ".mini-kode");
+  const sessionsDir = path.join(configDir, "sessions");
+
+  // Ensure directories exist
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+  if (!fs.existsSync(sessionsDir)) {
+    fs.mkdirSync(sessionsDir, { recursive: true });
+  }
+
+  return path.join(sessionsDir, `${sessionId}.json`);
+}
 
 /**
  * Save session to disk

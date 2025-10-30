@@ -98,4 +98,3 @@ The system automatically manages conversation length when approaching token limi
 - [Tools](./tools.md) - Tool system design
 - [Permission System](./permission.md) - Permission handling
 - [User Interface](./ui.md) - UI components, state management, and user interactions
-- [Trace Logging](./trace.md) - Debug with trace logs
