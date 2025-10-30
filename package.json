@@ -9,7 +9,7 @@
     "LICENSE"
   ],
   "bin": {
-    "mini-kode": "./dist/index.mjs"
+    "mini-kode": "dist/index.mjs"
   },
   "repository": {
     "type": "git",
