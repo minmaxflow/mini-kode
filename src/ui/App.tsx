@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useApp, useInput } from "ink";
 
 import { executeAgent } from "../agent/executor";
@@ -17,6 +17,8 @@ import { useAppState } from "./hooks/useAppState";
 import { createClient } from "../llm/client";
 import { executeCommand } from "./commands/executor";
 import { CommandName } from "./commands";
+import { ConfigManager } from "../config/manager";
+import { mcpService } from "../mcp";
 
 export interface AppProps {
   cwd: string;
@@ -41,6 +43,32 @@ export function App({ cwd, approvalMode }: AppProps) {
   // Centralized state management via custom Hook
   const { state, actions, refs, getCurrentApprovalMode, buildSession } =
     useAppState(approvalMode);
+
+  // Initialize MCP connections on app start
+  useEffect(() => {
+    async function initializeMCP() {
+      actions.initializeMCP();
+
+      try {
+        // Initialize MCP service (async, doesn't block UI)
+        await mcpService.initialize(cwd, false);
+
+        // Update UI state with server status
+        const serverStates = mcpService.getServerStates();
+        for (const serverState of serverStates) {
+          actions.updateMCPServer(serverState);
+        }
+
+        // Mark initialization complete
+        actions.completeMCPInitialization();
+      } catch (error) {
+        console.error("MCP initialization failed:", error);
+        actions.completeMCPInitialization();
+      }
+    }
+
+    initializeMCP();
+  }, [cwd, actions]);
 
   // ========================================================================
   // AGENT EXECUTION STATE DETECTION
