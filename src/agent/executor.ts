@@ -95,7 +95,7 @@ import { formatToolResultMessage } from "./formatters";
 
 import { executeToolsWithPermission } from "./toolExecutor";
 import { allToolsToOpenAIFormat } from "../tools/openai";
-import { ALL_TOOLS } from "../tools";
+import { getAllTools } from "../tools";
 import { buildSystemMessage } from "./context";
 import type {
   ExecutionContext,
@@ -286,7 +286,7 @@ export async function executeAgent(
     userPromptMessage,
   ];
 
-  const openaiTools = allToolsToOpenAIFormat(ALL_TOOLS);
+  const openaiTools = allToolsToOpenAIFormat(getAllTools());
 
   try {
     let iteration = 0;

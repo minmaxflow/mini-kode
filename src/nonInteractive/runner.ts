@@ -25,6 +25,7 @@ import type { ApprovalMode } from "../config";
 import { ConfigManager } from "../config";
 import type { PermissionUiHint } from "../tools/types";
 import { createSession } from "../sessions/types";
+import { mcpService } from "../mcp";
 
 /**
  * Format permission hint for error message.
@@ -74,6 +75,9 @@ export async function runNonInteractive(
   cwd: string,
   approvalMode?: ApprovalMode,
 ): Promise<number> {
+  // Initialize MCP service (wait for completion in non-interactive mode)
+  await mcpService.initialize(cwd, true);
+
   // Load configuration (approvalMode is now handled separately)
   const config = ConfigManager.load();
 

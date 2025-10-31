@@ -10,7 +10,7 @@
 
 import { applyPermissionGrant } from "../tools/permissionRequest";
 import { runToolBatchConcurrent, executeSingleToolCall } from "../tools/runner";
-import { ToolExecutionContext, TOOLS_BY_NAME } from "../tools";
+import { ToolExecutionContext, getToolsByName } from "../tools";
 import type { ParsedToolCall } from "../llm/client";
 import type { ToolCall, ToolName } from "../tools/runner.types";
 import type {
@@ -86,9 +86,11 @@ export async function executeToolsWithPermission(
   // Validate all tools and prepare tool calls
   const toolCallsToExecute: ToolCall[] = [];
 
+  const toolsByName = getToolsByName();
+
   for (let i = 0; i < calls.length; i++) {
     const call = calls[i];
-    const tool = TOOLS_BY_NAME[call.name as ToolName];
+    const tool = toolsByName[call.name as ToolName];
 
     if (!tool) {
       // Unknown tool - throw immediately
@@ -106,7 +108,7 @@ export async function executeToolsWithPermission(
 
   // Check if all tools are readonly for concurrent execution
   const allReadonly = toolCallsToExecute.every((tc) => {
-    const tool = TOOLS_BY_NAME[tc.toolName];
+    const tool = toolsByName[tc.toolName];
     return tool?.readonly === true;
   });
 
