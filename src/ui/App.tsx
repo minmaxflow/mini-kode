@@ -17,7 +17,6 @@ import { useAppState } from "./hooks/useAppState";
 import { createClient } from "../llm/client";
 import { executeCommand } from "./commands/executor";
 import { CommandName } from "./commands";
-import { ConfigManager } from "../config/manager";
 import { mcpService } from "../mcp";
 
 export interface AppProps {
@@ -50,8 +49,8 @@ export function App({ cwd, approvalMode }: AppProps) {
       actions.initializeMCP();
 
       try {
-        // Initialize MCP service (async, doesn't block UI)
-        await mcpService.initialize(cwd, false);
+        // Initialize MCP service (wait for completion to ensure tools are ready)
+        await mcpService.initialize(cwd, true);
 
         // Update UI state with server status
         const serverStates = mcpService.getServerStates();
@@ -62,8 +61,10 @@ export function App({ cwd, approvalMode }: AppProps) {
         // Mark initialization complete
         actions.completeMCPInitialization();
       } catch (error) {
-        console.error("MCP initialization failed:", error);
         actions.completeMCPInitialization();
+        actions.setError(
+          error instanceof Error ? error.message : String(error)
+        );
       }
     }
 
@@ -90,7 +91,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     state.isLLMGenerating ||
     state.toolCalls.some((toolCall) => isTransientToolState(toolCall.status)) ||
     state.messages.some(
-      (msg) => msg.kind === "cmd" && msg.status === "executing",
+      (msg) => msg.kind === "cmd" && msg.status === "executing"
     );
 
   // Handle ESC key to abort execution (LLM generation or tool execution)
@@ -100,7 +101,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     if (key.escape) {
       // Check if there are any active permission prompts
       const hasPermissionPrompt = state.toolCalls.some(
-        (call) => call.status === "permission_required",
+        (call) => call.status === "permission_required"
       );
 
       // Only handle abort if there's no permission prompt active
@@ -169,7 +170,7 @@ export function App({ cwd, approvalMode }: AppProps) {
       // When a tool needs user approval, this callback gets called.
       onPermissionRequired: async (
         hint: PermissionUiHint,
-        requestId: string,
+        requestId: string
       ) => {
         // How it works:
         // - requestUserApproval() registers a resolver in refs.pendingApprovals.current
@@ -183,7 +184,7 @@ export function App({ cwd, approvalMode }: AppProps) {
         // by the executor before calling this callback, so the UI is ready
         const decision = await requestUserApproval(
           requestId,
-          refs.pendingApprovals.current,
+          refs.pendingApprovals.current
         );
 
         return decision;
@@ -215,7 +216,7 @@ export function App({ cwd, approvalMode }: AppProps) {
         getApprovalMode: getCurrentApprovalMode,
         session: session,
       },
-      callbacks,
+      callbacks
     );
   };
 
@@ -256,7 +257,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     resolveApproval(
       requestId,
       { approved: true, option },
-      refs.pendingApprovals.current,
+      refs.pendingApprovals.current
     );
   };
 
@@ -279,7 +280,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     resolveApproval(
       requestId,
       { approved: false, reason: "user_rejected" },
-      refs.pendingApprovals.current,
+      refs.pendingApprovals.current
     );
   };
 
@@ -297,13 +298,13 @@ export function App({ cwd, approvalMode }: AppProps) {
           cwd,
         }),
         actions,
-        handleSubmit,
+        handleSubmit
       );
 
       // For backward compatibility, only add commands that don't manage their own state
       // Currently all commands manage their own state, so no special handling needed
     },
-    [state.messages, actions, handleSubmit, cwd],
+    [state.messages, actions, handleSubmit, cwd]
   );
 
   const handleExit = (): void => {
