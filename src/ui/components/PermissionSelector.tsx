@@ -123,6 +123,28 @@ function buildOptions(uiHint: PermissionSelectorProps["uiHint"]): OptionItem[] {
     ];
   }
 
+  if (uiHint.kind === "mcp") {
+    return [
+      {
+        value: "once",
+        label: "Yes (only this time)",
+      },
+      {
+        value: "remember-prefix",
+        label: `Yes, remember for ${uiHint.serverName} tools`,
+      },
+      {
+        value: "remember-all",
+        label: `Yes, remember for all MCP tools`,
+      },
+      {
+        value: "reject",
+        label: "No (esc)",
+      },
+    ];
+  }
+
+  // Default to FS permissions
   const filePath = uiHint.path;
   const dirPath = path.dirname(filePath);
 
@@ -170,6 +192,23 @@ function renderUiHintDetails(uiHint: PermissionUiHint, cwd: string) {
         <Text>WRITE grant needed for:</Text>
         <Box marginTop={1} marginLeft={2}>
           <Text color={getCurrentTheme().warning}>{displayPath}</Text>
+        </Box>
+        {uiHint.message && (
+          <Box marginLeft={2}>
+            <Text dimColor>{uiHint.message}</Text>
+          </Box>
+        )}
+      </Box>
+    );
+  }
+
+  if (uiHint.kind === "mcp") {
+    const toolDisplay = `${uiHint.serverName}.${uiHint.toolName}`
+    return (
+      <Box flexDirection="column">
+        <Text>MCP Tool access needed for:</Text>
+        <Box marginTop={1} marginLeft={2}>
+          <Text color={getCurrentTheme().warning}>{toolDisplay}</Text>
         </Box>
         {uiHint.message && (
           <Box marginLeft={2}>
