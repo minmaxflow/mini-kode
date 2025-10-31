@@ -41,7 +41,7 @@
   },
   "scripts": {
     "dev": "DEV=true bun --watch run src/index.ts",
-    "build": "bun build src/index.ts --outfile dist/index.mjs --target=node",
+    "build": "bun build src/index.ts --outfile dist/index.mjs --target=node --minify",
     "test": "vitest run",
     "lint": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
