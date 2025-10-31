@@ -9,7 +9,7 @@
  * MCP server configuration
  * 
  * This type defines the configuration for connecting to an MCP server.
- * It supports multiple transport types and connection methods.
+ * It supports stdio and HTTP transport types.
  * 
  * @example stdio transport with environment variable references in args
  * {
@@ -18,7 +18,7 @@
  *   "args": ["--api-key", "${MCP_API_KEY}", "--database", "${DB_URL}"]
  * }
  * 
- * @example Web transport with environment variable references in headers
+ * @example HTTP transport with environment variable references in headers
  * {
  *   "transport": "http",
  *   "url": "https://api.example.com/mcp",
@@ -33,15 +33,15 @@ export interface MCPServerConfig {
   command?: string;
   /** Command line arguments (supports ${ENV_VAR} environment variable references) */
   args?: string[];
-  /** URL for HTTP/SSE/WebSocket transports */
+  /** URL for HTTP transport */
   url?: string;
   /** Transport type (auto-detected if not specified) */
-  transport?: "stdio" | "sse" | "http" | "websocket";
-  /** HTTP headers for Web transports (supports ${ENV_VAR} environment variable references) */
+  transport?: "stdio" | "http";
+  /** HTTP headers for HTTP transport (supports ${ENV_VAR} environment variable references) */
   headers?: Record<string, string>;
 }
 
 /**
  * Transport type for MCP server connections
  */
-export type TransportType = "stdio" | "sse" | "http" | "websocket";
+export type TransportType = "stdio" | "http";
