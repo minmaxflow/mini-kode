@@ -35,6 +35,20 @@ export class ProjectPaths {
   }
 
   /**
+   * Get MCP configuration file path
+   */
+  static getMCPConfigPath(cwd: string = process.cwd()): string {
+    return path.join(cwd, this.CONFIG_DIR, "mcp.json");
+  }
+
+  /**
+   * Get project config file path (legacy method, prefer specific methods)
+   */
+  static getProjectConfigPath(cwd: string, fileName: string): string {
+    return path.join(cwd, this.CONFIG_DIR, fileName);
+  }
+
+  /**
    * Ensure directory exists for a given file path
    */
   static ensureDirectoryExists(filePath: string): void {

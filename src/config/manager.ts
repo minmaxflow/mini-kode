@@ -413,7 +413,7 @@ export class ConfigManager {
    * Read MCP configuration from project directory
    */
   static readMCPConfig(cwd: string): MCPConfig | null {
-    const filePath = ProjectPaths.getProjectConfigPath(cwd, "mcp.json");
+    const filePath = ProjectPaths.getMCPConfigPath(cwd);
 
     try {
       if (!fs.existsSync(filePath)) {
