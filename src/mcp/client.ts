@@ -181,6 +181,8 @@ export class MCPClientManager {
         return new StdioClientTransport({
           command: config.command,
           args: resolveArgs(config.args),
+          // Redirect stderr to null to prevent MCP server logs from polluting terminal
+          stderr: "ignore",
         });
 
       case "http":
