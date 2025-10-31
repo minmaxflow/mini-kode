@@ -16,10 +16,7 @@ const mockAppState: AppState = {
     total_tokens: 0,
   },
   clearNum: 0,
-  mcp: {
-    initialized: false,
-    servers: [],
-  },
+  mcp: [],
 };
 
 const mockAppActions: AppActions = {
@@ -38,9 +35,7 @@ const mockAppActions: AppActions = {
   completeCommandCall: vi.fn(),
   clearSession: vi.fn(),
   updateTokenUsage: vi.fn(),
-  initializeMCP: vi.fn(),
   updateMCPServer: vi.fn(),
-  completeMCPInitialization: vi.fn(),
 };
 
 const mockOnExit = vi.fn();

@@ -36,11 +36,14 @@ importers:
         specifier: ^5.23.1
         version: 5.23.2(ws@8.18.3)(zod@3.25.76)
       react:
-        specifier: ^19.1.1
+        specifier: ^19.2.0
         version: 19.2.0
       react-devtools-core:
         specifier: ^6.1.2
         version: 6.1.5
+      use-effect-event:
+        specifier: ^2.0.3
+        version: 2.0.3(react@19.2.0)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -52,7 +55,7 @@ importers:
         specifier: ^24.5.2
         version: 24.8.1
       '@types/react':
-        specifier: ^19.1.15
+        specifier: ^19.2.0
         version: 19.2.2
       ink-testing-library:
         specifier: ^4.0.0
@@ -1127,6 +1130,11 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  use-effect-event@2.0.3:
+    resolution: {integrity: sha512-fz1en+z3fYXCXx3nMB8hXDMuygBltifNKZq29zDx+xNJ+1vEs6oJlYd9sK31vxJ0YI534VUsHEBY0k2BATsmBQ==}
+    peerDependencies:
+      react: ^18.3 || ^19.0.0-0
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -2239,6 +2247,10 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  use-effect-event@2.0.3(react@19.2.0):
+    dependencies:
+      react: 19.2.0
 
   vary@1.1.2: {}
 

@@ -21,28 +21,26 @@ import { formatToolResultMessage } from "../../agent/formatters";
 import { CommandCall } from "../commands";
 import type { MCPServerState } from "../../mcp/client";
 
-// Separate MCP reducer for better maintainability
-function mcpReducer(
-  state: { initialized: boolean; servers: MCPServerState[] },
+// Simplified MCP state updates
+function updateMCPServers(
+  servers: MCPServerState[],
   action: Action,
-): { initialized: boolean; servers: MCPServerState[] } {
+): MCPServerState[] {
   switch (action.type) {
-    case "MCP_INITIALIZE_START":
-      return { ...state, initialized: false };
-
     case "MCP_SERVER_UPDATE":
-      return {
-        ...state,
-        servers: state.servers.map((s) =>
+      const existingIndex = servers.findIndex(s => s.name === action.payload.name);
+      if (existingIndex !== -1) {
+        // Update existing server
+        return servers.map((s) =>
           s.name === action.payload.name ? action.payload : s,
-        ),
-      };
-
-    case "MCP_INITIALIZE_COMPLETE":
-      return { ...state, initialized: true };
+        );
+      } else {
+        // Insert new server
+        return [...servers, action.payload];
+      }
 
     default:
-      return state;
+      return servers;
   }
 }
 /**
@@ -79,10 +77,7 @@ export type AppState = {
   clearNum: number;
 
   /** MCP servers state */
-  mcp: {
-    initialized: boolean;
-    servers: MCPServerState[];
-  };
+  mcp: MCPServerState[];
 };
 
 /**
@@ -124,12 +119,7 @@ type Action =
     }
   | { type: "CLEAR_SESSION" }
   | { type: "UPDATE_TOKEN_USAGE"; tokenUsage: TokenUsage }
-  | { type: "MCP_INITIALIZE_START" }
-  | {
-      type: "MCP_SERVER_UPDATE";
-      payload: MCPServerState;
-    }
-  | { type: "MCP_INITIALIZE_COMPLETE" };
+  | { type: "MCP_SERVER_UPDATE"; payload: MCPServerState }
 
 /**
  * State reducer for managing App state transitions.
@@ -450,12 +440,10 @@ function reducer(state: AppState, action: Action): AppState {
         clearNum: state.clearNum + 1,
       };
 
-    case "MCP_INITIALIZE_START":
     case "MCP_SERVER_UPDATE":
-    case "MCP_INITIALIZE_COMPLETE":
       return {
         ...state,
-        mcp: mcpReducer(state.mcp, action),
+        mcp: updateMCPServers(state.mcp, action),
       };
 
     case "UPDATE_TOKEN_USAGE":
@@ -571,10 +559,7 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
       total_tokens: 0,
     },
     clearNum: 0,
-    mcp: {
-      initialized: false,
-      servers: [],
-    },
+    mcp: [],
   });
 
   const abortRef = useRef<AbortController | null>(null);
@@ -758,12 +743,6 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
       });
     }, []),
 
-    /**
-     * Initialize MCP connection
-     */
-    initializeMCP: useCallback(() => {
-      dispatch({ type: "MCP_INITIALIZE_START" });
-    }, []),
 
     /**
      * Update MCP server status
@@ -773,13 +752,6 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
         type: "MCP_SERVER_UPDATE",
         payload: status,
       });
-    }, []),
-
-    /**
-     * Complete MCP initialization
-     */
-    completeMCPInitialization: useCallback(() => {
-      dispatch({ type: "MCP_INITIALIZE_COMPLETE" });
     }, []),
 
     /**

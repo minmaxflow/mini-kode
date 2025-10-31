@@ -81,6 +81,32 @@ export function Layout({
         clearNum={state.clearNum}
       />
 
+      {/* MCP servers status */}
+      {state.mcp.length > 0 && (
+        <Box marginTop={1} flexDirection="column">
+          <Text>
+            MCP:{" "}
+            {state.mcp.filter((s) => s.status === "connected").length}/
+            {state.mcp.length} connected
+          </Text>
+          {state.mcp.map((server) => (
+            <Box key={server.name} marginLeft={2} flexDirection="column">
+              <Text>
+                {server.name}: {server.status}{" "}
+                {server.tools.length > 0
+                  ? `(${server.tools.length} tools)`
+                  : ""}
+              </Text>
+              {server.status === "error" && server.error && (
+                <Text color={getCurrentTheme().error}>
+                  Error: {server.error}
+                </Text>
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
+
       {/* Error message display */}
       {state.error && (
         <Box marginTop={1} flexDirection="column">

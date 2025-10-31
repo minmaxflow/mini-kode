@@ -1,4 +1,5 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
+import {useEffectEvent} from 'use-effect-event'
 import { useApp, useInput } from "ink";
 
 import { executeAgent } from "../agent/executor";
@@ -43,27 +44,16 @@ export function App({ cwd, approvalMode }: AppProps) {
   const { state, actions, refs, getCurrentApprovalMode, buildSession } =
     useAppState(approvalMode);
 
+  // Use useEffectEvent to prevent infinite re-renders
+  const updateMCPServer = useEffectEvent(actions.updateMCPServer);
+  const setError = useEffectEvent(actions.setError);
+  
   // Initialize MCP connections on app start
   useEffect(() => {
-    async function initializeMCP() {
-      actions.initializeMCP();
-
-      try {
-        // Initialize MCP service with progress callbacks (non-blocking)
-        await mcpService.initializeWithProgress(cwd, actions.updateMCPServer);
-
-        // Mark initialization complete
-        actions.completeMCPInitialization();
-      } catch (error) {
-        actions.completeMCPInitialization();
-        actions.setError(
-          error instanceof Error ? error.message : String(error)
-        );
-      }
-    }
-
-    initializeMCP();
-  }, [cwd, actions]);
+    mcpService.initializeWithProgress(cwd, updateMCPServer).catch(error => {
+      setError(error instanceof Error ? error.message : String(error));
+    });
+  }, [cwd, updateMCPServer, setError]);
 
   // ========================================================================
   // AGENT EXECUTION STATE DETECTION
