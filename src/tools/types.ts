@@ -6,7 +6,8 @@ export type ReadonlyFlag = true | false;
 
 export type PermissionUiHint =
   | { kind: "fs"; path: string; message?: string }
-  | { kind: "bash"; command: string; message?: string };
+  | { kind: "bash"; command: string; message?: string }
+  | { kind: "mcp"; serverName: string; toolName: string; message?: string };
 
 /**
  * Permission required error thrown when a tool needs user approval.
@@ -56,6 +57,11 @@ export interface Tool<Input, Output> {
   description: string;
   readonly: ReadonlyFlag;
   inputSchema: z.ZodType<Input>;
+  /**
+   * Optional JSON Schema for the tool input.
+   * If provided, this will be used directly instead of converting from Zod schema.
+   */
+  jsonSchema?: Record<string, unknown>;
   /**
    * Execute the tool with the given input and context.
    *

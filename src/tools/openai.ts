@@ -14,7 +14,8 @@ export type OpenAITool = ChatCompletionFunctionTool;
 /**
  * Convert a single tool to OpenAI Function Calling format
  *
- * Uses `zod-to-json-schema` library to convert Zod schema to JSON Schema.
+ * Uses `zod-to-json-schema` library to convert Zod schema to JSON Schema,
+ * or uses the provided jsonSchema directly if available.
  *
  * Note: We use the default target format instead of 'openapi-3.0' because:
  * - Zod's `positive()` constraint → exclusiveMinimum: 0 (number) in default format
@@ -25,9 +26,17 @@ export type OpenAITool = ChatCompletionFunctionTool;
  * @returns Tool definition in OpenAI API format
  */
 export function toolToOpenAIFormat(tool: Tool<any, any>): OpenAITool {
-  // Get JSON Schema from Zod schema and remove $schema field for OpenAI compatibility
-  const rawSchema = zodToJsonSchema(tool.inputSchema);
-  const { $schema, ...parameters } = rawSchema;
+  let parameters: Record<string, unknown>;
+  
+  if (tool.jsonSchema) {
+    // Use the provided JSON Schema directly
+    parameters = tool.jsonSchema;
+  } else {
+    // Convert Zod schema to JSON Schema
+    const rawSchema = zodToJsonSchema(tool.inputSchema);
+    const { $schema, ...schema } = rawSchema;
+    parameters = schema;
+  }
 
   return {
     type: "function",
@@ -50,3 +59,5 @@ export function allToolsToOpenAIFormat(
 ): OpenAITool[] {
   return tools.map((tool) => toolToOpenAIFormat(tool));
 }
+
+

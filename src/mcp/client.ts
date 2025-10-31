@@ -215,8 +215,8 @@ export class MCPClientManager {
    */
   async shutdown(): Promise<void> {
     const closePromises = Array.from(this.clients.values()).map((client) =>
-      client.close().catch((error) => {
-        // ignore error
+      client.close().catch((_error) => {
+        // ignore error when shutdown
       }),
     );
 
