@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { toolToOpenAIFormat, allToolsToOpenAIFormat } from "./openai";
-import { ALL_TOOLS, TOOLS_BY_NAME } from "./index";
+import { ALL_TOOLS, getToolsByName } from "./index";
 import type { ToolName } from "./runner.types";
 import { FileReadTool } from "./fileRead";
 import { ListFilesTool } from "./listFiles";
@@ -23,16 +23,18 @@ describe("Tools Registry", () => {
     expect(names).toContain("todo_write");
   });
 
-  test("TOOLS_BY_NAME can find tools by name", () => {
-    expect(TOOLS_BY_NAME["fileRead"]).toBe(FileReadTool);
-    expect(TOOLS_BY_NAME["listFiles"]).toBe(ListFilesTool);
-    expect(TOOLS_BY_NAME["grep"]).toBe(GrepTool);
-    expect(TOOLS_BY_NAME["bash"]).toBe(BashTool);
+  test("getToolsByName can find tools by name", () => {
+    const toolsByName = getToolsByName();
+    expect(toolsByName["fileRead"]).toBe(FileReadTool);
+    expect(toolsByName["listFiles"]).toBe(ListFilesTool);
+    expect(toolsByName["grep"]).toBe(GrepTool);
+    expect(toolsByName["bash"]).toBe(BashTool);
   });
 
   test("All tool names exist in mapping", () => {
+    const toolsByName = getToolsByName();
     for (const tool of ALL_TOOLS) {
-      expect(TOOLS_BY_NAME[tool.name as ToolName]).toBe(tool);
+      expect(toolsByName[tool.name as ToolName]).toBe(tool);
     }
   });
 });

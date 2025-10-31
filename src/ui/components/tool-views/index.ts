@@ -8,7 +8,7 @@ import path from "path";
 
 import React from "react";
 
-import { TOOLS_BY_NAME } from "../../../tools";
+import { getToolsByName } from "../../../tools";
 import type { BashInput } from "../../../tools/bash";
 import type { FileEditInput } from "../../../tools/fileEdit";
 import type { FileReadInput } from "../../../tools/fileRead";
@@ -193,6 +193,7 @@ export function getToolResultView(
  * @returns true if the tool is readonly, false otherwise
  */
 export function isToolReadonly(toolName: ToolName): boolean {
-  const tool = TOOLS_BY_NAME[toolName];
+  const toolsByName = getToolsByName();
+  const tool = toolsByName[toolName];
   return tool ? tool.readonly : false;
 }

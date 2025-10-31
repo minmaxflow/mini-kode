@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { streamChatCompletion } from "../llm/client";
 import { executeAgent } from "./executor";
-import { TOOLS_BY_NAME } from "../tools";
+import { getToolsByName } from "../tools";
 import { runToolBatchConcurrent, executeSingleToolCall } from "../tools/runner";
 import type { ExecutionContext, ExecutionCallbacks } from "./types";
 import { createSession } from "../sessions/types";
@@ -33,7 +33,18 @@ vi.mock("./context", () => ({
 
 vi.mock("../tools", () => ({
   ALL_TOOLS: [],
-  TOOLS_BY_NAME: {},
+  getAllTools: vi.fn(() => [
+    { name: "fileRead", readonly: true },
+    { name: "fileEdit", readonly: false },
+    { name: "listFiles", readonly: true },
+    { name: "grep", readonly: true },
+  ]),
+  getToolsByName: vi.fn(() => ({
+    fileRead: { name: "fileRead", readonly: true },
+    fileEdit: { name: "fileEdit", readonly: false },
+    listFiles: { name: "listFiles", readonly: true },
+    grep: { name: "grep", readonly: true },
+  })),
 }));
 
 vi.mock("../tools/openai", () => ({
@@ -95,14 +106,15 @@ describe("AgentExecutor", () => {
 
     describe("Tool execution scenarios", () => {
       beforeEach(() => {
-        (TOOLS_BY_NAME as any).fileRead = {
+        const toolsByName = getToolsByName();
+        (toolsByName as any).fileRead = {
           name: "fileRead",
           description: "A test readonly tool",
           readonly: true,
           inputSchema: { parse: (v: any) => v },
           execute: vi.fn(),
         };
-        (TOOLS_BY_NAME as any).fileEdit = {
+        (toolsByName as any).fileEdit = {
           name: "fileEdit",
           description: "A test write tool",
           readonly: false,

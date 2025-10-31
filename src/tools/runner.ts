@@ -1,4 +1,4 @@
-import { ToolExecutionContext, TOOLS_BY_NAME } from "./index";
+import { ToolExecutionContext, getToolsByName } from "./index";
 import type { ToolCall } from "./runner.types";
 import { PermissionRequiredError } from "./types";
 
@@ -26,7 +26,8 @@ async function executeSingleTool(
 
   try {
     // Get the tool instance from the tool name
-    const tool = TOOLS_BY_NAME[toolCall.toolName]!;
+    const toolsByName = getToolsByName();
+    const tool = toolsByName[toolCall.toolName]!;
 
     // cast input to any to avoid type errors
     const result = await tool.execute(toolCall.input as any, execContext);
