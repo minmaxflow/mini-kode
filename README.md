@@ -123,11 +123,12 @@ src/
 
 1. **Session Persistence and Resume** - Save and restore agent sessions
 2. **MCP (Model Context Protocol) Support** - Integration with MCP servers
-3. **LLM Built-in Tool Integration** - Support for LLM's native tool capabilities
+3. **LLM Built-in Tool Integration** - Support for LLM's native tool capabilities (note: DeepSeek currently doesn't support web search tools)
 4. **Image Input Support** - Process and analyze image inputs
 5. **Sub Agents Functionality** - Hierarchical agent delegation
 6. **Reasoning Model Support** - Integration with reasoning-focused models
 7. **Tool Call Message Streaming** - Real-time streaming of tool execution
+8. **Context Caching** - Smart caching of conversation context to reduce token usage
 
 ## 📚 References
 
