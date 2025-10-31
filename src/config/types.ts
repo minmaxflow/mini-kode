@@ -4,10 +4,18 @@
  * Simplified type definitions for the global-only configuration system.
  */
 
+import type { MCPServerConfig } from "../mcp/types";
+
 /**
  * Approval mode for operations
  */
 export type ApprovalMode = "default" | "autoEdit" | "yolo";
+
+export interface MCPConfig {
+  servers: {
+    [name: string]: MCPServerConfig;
+  };
+}
 
 /**
  * Theme mode for the UI

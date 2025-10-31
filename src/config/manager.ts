@@ -25,6 +25,7 @@ import type {
   ConfigFieldPath,
   ConfigFieldValue,
   ConfigSource,
+  MCPConfig,
 } from "./types";
 import { ProjectPaths } from "../utils/paths";
 
@@ -406,5 +407,34 @@ export class ConfigManager {
    */
   static delete(fieldPath: ConfigFieldPath): void {
     this.set(fieldPath, undefined as any);
+  }
+
+  /**
+   * Read MCP configuration from project directory
+   */
+  static readMCPConfig(cwd: string): MCPConfig | null {
+    const filePath = ProjectPaths.getProjectConfigPath(cwd, "mcp.json");
+
+    try {
+      if (!fs.existsSync(filePath)) {
+        return null;
+      }
+
+      const raw = fs.readFileSync(filePath, "utf8");
+      const parsed = JSON.parse(raw);
+
+      // Basic validation
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+
+      if (!parsed.servers || typeof parsed.servers !== "object") {
+        return null;
+      }
+
+      return parsed as MCPConfig;
+    } catch (error) {
+      return null;
+    }
   }
 }
