@@ -131,6 +131,44 @@ mini-kode config delete llm.model
 }
 ```
 
+## MCP Configuration
+
+Mini-Kode supports **Model Context Protocol (MCP)** servers. Create `.mini-kode/mcp.json` in your project:
+
+### Supported Transports
+
+- **stdio**: Local command-line servers
+- **http**: HTTP-based servers
+
+### Environment Variables
+
+Use `${ENV_VAR}` syntax in `args` and `headers` for secure configuration. Mini-Kode automatically resolves these references from your environment:
+
+```json
+{
+  "servers": {
+    "github": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github", "--token", "${GITHUB_TOKEN}"]
+    },
+    "api-server": {
+      "transport": "http",
+      "url": "https://api.example.com",
+      "headers": {
+        "Authorization": "Bearer ${API_KEY}"
+      }
+    }
+  }
+}
+```
+
+**How it works:**
+- `${ENV_VAR}` patterns in `args` and `headers` are automatically replaced with actual environment variable values
+- For stdio transport: environment variables are resolved in command arguments
+- For HTTP transport: environment variables are resolved in request headers
+- If environment variable is not found, the original `${ENV_VAR}` text is kept
+
 ## Security
 
 - **API keys are never stored in config files**

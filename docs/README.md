@@ -21,6 +21,7 @@ Mini-Code is an **educational AI coding assistant** that demonstrates how modern
 | [Permission](./permission.md)                     | Multi-layer permission system                     | Security        |
 | [LLM Tool Integration](./llm-tool-integration.md) | Complete integration flow                         | Coordination    |
 | [User Interface](./ui.md)                         | UI components, state management, and interactions | User Experience |
+| [Configuration](./config.md)                      | Settings, API management, and MCP integration     | Customization   |
 
 ## Key Learning Concepts
 
@@ -52,7 +53,12 @@ Three-layer security model balancing safety with convenience:
 - **Progressive tool rendering**: Tools show results as they complete
 - **Async permission handling**: Permission requests don't block the UI
 
-### 5. User Control Features
+### 5. MCP Integration
+
+- **Multi-transport Support**: Connect to MCP servers via stdio, HTTP
+- **Tool Bridging**: Automatically convert MCP tools to mini-kode's tool system
+
+### 6. User Control Features
 
 - **Slash Commands**: Direct commands for session management (`/clear`, `/compact`, `/init`)
 - **Auto-compaction**: Automatic conversation compression when token limits approach

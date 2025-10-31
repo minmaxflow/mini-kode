@@ -42,6 +42,7 @@ This optimization allows read operations to happen in parallel while ensuring wr
 | `architect`  | Read-only | Generate plans (LLM) | No                  |
 | `todo_read`  | Read-only | Read tasks           | No                  |
 | `todo_write` | Read-only | Update tasks         | No                  |
+| `MCP Tools`  | Dynamic   | External MCP servers | Yes                 |
 
 ## How Tools Work
 
@@ -109,7 +110,7 @@ if (context.signal?.aborted) {
 
 **ToolCall** represents the runtime execution state that UI components render:
 
-```typescript
+````typescript
 type ToolCall = {
   requestId: string; // Unique tracking ID
   toolName: string; // Tool being executed
@@ -121,4 +122,13 @@ type ToolCall = {
   error?: ToolError; // Error details
   uiHint?: PermissionUiHint; // Permission prompt details
 };
-```
+
+## MCP Tool Integration
+
+Mini-Kode supports **Model Context Protocol (MCP)** servers, allowing you to extend the tool system with external services:
+
+### How MCP Tools Work
+
+1. **Server Discovery**: Configure MCP servers in `.mini-kode/mcp.json`
+2. **Auto-registration**: Tools from connected servers are automatically registered
+3. **Execution Bridge**: MCP tools execute through the MCP client manager
