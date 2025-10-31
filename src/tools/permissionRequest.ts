@@ -52,6 +52,7 @@
 import path from "path";
 import type { PermissionUiHint } from "./types";
 import { addSessionGrant, addProjectGrant } from "../permissions";
+import type { MCPGrant } from "../permissions/types";
 import type { FsGrant, BashGrant } from "../permissions";
 
 /**
@@ -211,6 +212,48 @@ function createBashGrant(
 }
 
 /**
+ * Create a MCP grant based on user approval option.
+ *
+ * @param uiHint The permission UI hint containing MCP details
+ * @param option The permission option chosen by the user
+ * @returns MCPGrant object or null if option is reject
+ */
+function createMCPGrant(
+  uiHint: PermissionUiHint,
+  option: PermissionOption,
+): MCPGrant | null {
+  if (option === "reject" || uiHint.kind !== "mcp") {
+    return null;
+  }
+
+  let serverName: string;
+  let toolName: string | undefined;
+
+  if (option === "once") {
+    // One-time approval - grant for specific tool only
+    serverName = uiHint.serverName;
+    toolName = uiHint.toolName;
+  } else if (option === "remember-prefix") {
+    // Grant all tools for this specific server
+    serverName = uiHint.serverName;
+    toolName = undefined;
+  } else if (option === "remember-all") {
+    // Grant all tools for all MCP servers (global)
+    serverName = "*";
+    toolName = undefined;
+  } else {
+    return null; // Unknown option
+  }
+
+  return {
+    type: "mcp",
+    serverName,
+    toolName,
+    grantedAt: new Date().toISOString(),
+  };
+}
+
+/**
  * Apply a permission grant based on user approval.
  *
  * This function provides clear separation between session and project
@@ -244,12 +287,14 @@ export async function applyPermissionGrant(
   option: PermissionOption,
   cwd: string,
 ): Promise<void> {
-  let grant: FsGrant | BashGrant | null;
+  let grant: FsGrant | BashGrant | MCPGrant | null;
 
   if (uiHint.kind === "fs") {
     grant = createFsGrant(uiHint, option);
   } else if (uiHint.kind === "bash") {
     grant = createBashGrant(uiHint, option);
+  } else if (uiHint.kind === "mcp") {
+    grant = createMCPGrant(uiHint, option);
   } else {
     return; // Unknown uiHint kind
   }
