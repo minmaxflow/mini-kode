@@ -67,6 +67,23 @@ function resolveHeaders(headers: Record<string, string> | undefined): Record<str
 export class MCPClientManager {
   private clients: Map<string, Client> = new Map();
   private states: Map<string, MCPServerState> = new Map();
+  
+  /**
+   * Callback for server state changes (used for UI updates)
+   */
+  onServerStateChange?: (serverState: MCPServerState) => void;
+
+  /**
+   * Update server state and notify callback if set
+   */
+  private updateServerState(serverState: MCPServerState): void {
+    this.states.set(serverState.name, serverState);
+    
+    // Notify callback if set
+    if (this.onServerStateChange) {
+      this.onServerStateChange(serverState);
+    }
+  }
 
   /**
    * Initialize MCP servers from configuration
@@ -98,7 +115,7 @@ export class MCPClientManager {
     config: MCPServerConfig,
   ): Promise<void> {
     // Update state to connecting
-    this.states.set(name, {
+    this.updateServerState({
       name,
       status: "connecting",
       tools: [],
@@ -121,7 +138,7 @@ export class MCPClientManager {
       const tools: MCPTool[] = toolsResult.tools;
 
       // Update state to connected
-      this.states.set(name, {
+      this.updateServerState({
         name,
         status: "connected",
         tools,
@@ -130,7 +147,7 @@ export class MCPClientManager {
       this.clients.set(name, client);
     } catch (error) {
       // Update state to error
-      this.states.set(name, {
+      this.updateServerState({
         name,
         status: "error",
         error: error instanceof Error ? error.message : String(error),

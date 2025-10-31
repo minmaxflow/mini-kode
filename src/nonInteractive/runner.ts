@@ -76,7 +76,7 @@ export async function runNonInteractive(
   approvalMode?: ApprovalMode,
 ): Promise<number> {
   // Initialize MCP service (wait for completion in non-interactive mode)
-  await mcpService.initialize(cwd, true);
+  await mcpService.initialize(cwd);
 
   // Load configuration (approvalMode is now handled separately)
   const config = ConfigManager.load();

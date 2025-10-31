@@ -5,7 +5,7 @@
  * Handles both UI and non-interactive modes with appropriate timing.
  */
 
-import { MCPClientManager } from "./client";
+import { MCPClientManager, type MCPServerState } from "./client";
 import { createMCPTools } from "./tools";
 import { setMCPTools } from "../tools";
 import { ConfigManager } from "../config/manager";
@@ -29,35 +29,53 @@ export class MCPService {
   }
 
   /**
-   * Initialize MCP service
+   * Initialize MCP service (blocking version)
    *
-   * This method:
-   * - For UI mode: Initializes asynchronously (doesn't block startup)
-   * - For non-interactive mode: Waits for initialization to complete
+   * For non-interactive mode: Waits for initialization to complete
    *
    * @param cwd - Current working directory
-   * @param waitForCompletion - Whether to wait for initialization to complete
    * @returns Promise that resolves when initialization is complete
    */
-  async initialize(cwd: string, waitForCompletion = false): Promise<void> {
+  async initialize(cwd: string): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
-    // If initialization is already in progress, return that promise
+    // If initialization is already in progress, wait for it
     if (this.initializationPromise) {
-      if (waitForCompletion) {
-        await this.initializationPromise;
-      }
+      await this.initializationPromise;
       return;
     }
 
-    // Create new initialization promise
+    // Create new initialization promise and wait for it
     this.initializationPromise = this.doInitialize(cwd);
+    await this.initializationPromise;
+  }
 
-    if (waitForCompletion) {
-      await this.initializationPromise;
+  /**
+   * Initialize MCP service with progress callbacks (non-blocking version)
+   *
+   * For UI mode: Starts initialization asynchronously with progress updates
+   *
+   * @param cwd - Current working directory
+   * @param onServerStateChange - Callback for server state updates
+   * @returns Promise that resolves when initialization starts
+   */
+  async initializeWithProgress(
+    cwd: string,
+    onServerStateChange?: (serverState: MCPServerState) => void,
+  ): Promise<void> {
+    if (this.isInitialized) {
+      return;
     }
+
+    // If initialization is already in progress, return
+    if (this.initializationPromise) {
+      return;
+    }
+
+    // Create new initialization promise with progress callbacks
+    this.initializationPromise = this.doInitializeWithProgress(cwd, onServerStateChange);
   }
 
   /**
@@ -75,6 +93,44 @@ export class MCPService {
 
       // Create and initialize MCP client manager
       this.clientManager = new MCPClientManager();
+      await this.clientManager.initializeFromConfig(mcpConfig);
+
+      // Create and register MCP tools
+      const mcpTools = createMCPTools(this.clientManager);
+      setMCPTools(mcpTools);
+
+      this.isInitialized = true;
+    } catch (error) {
+      console.error("MCP initialization failed:", error);
+      // Mark as initialized even if failed to avoid repeated attempts
+      this.isInitialized = true;
+    }
+  }
+
+  /**
+   * Perform MCP initialization with progress callbacks
+   */
+  private async doInitializeWithProgress(
+    cwd: string,
+    onServerStateChange?: (serverState: MCPServerState) => void,
+  ): Promise<void> {
+    try {
+      // Read MCP configuration
+      const mcpConfig = ConfigManager.readMCPConfig(cwd);
+      if (!mcpConfig) {
+        // No MCP config found
+        this.isInitialized = true;
+        return;
+      }
+
+      // Create MCP client manager with progress callbacks
+      this.clientManager = new MCPClientManager();
+      
+      // Set up server state change listener if provided
+      if (onServerStateChange) {
+        this.clientManager.onServerStateChange = onServerStateChange;
+      }
+
       await this.clientManager.initializeFromConfig(mcpConfig);
 
       // Create and register MCP tools

@@ -49,14 +49,8 @@ export function App({ cwd, approvalMode }: AppProps) {
       actions.initializeMCP();
 
       try {
-        // Initialize MCP service (wait for completion to ensure tools are ready)
-        await mcpService.initialize(cwd, true);
-
-        // Update UI state with server status
-        const serverStates = mcpService.getServerStates();
-        for (const serverState of serverStates) {
-          actions.updateMCPServer(serverState);
-        }
+        // Initialize MCP service with progress callbacks (non-blocking)
+        await mcpService.initializeWithProgress(cwd, actions.updateMCPServer);
 
         // Mark initialization complete
         actions.completeMCPInitialization();
