@@ -1,4 +1,4 @@
-import type { FsGrant, BashGrant, ProjectPolicy } from "./types";
+import type { FsGrant, BashGrant, MCPGrant, ProjectPolicy } from "./types";
 import {
   readProjectPermissions,
   writeProjectPermissions,
@@ -74,7 +74,10 @@ export function writeProjectPolicy(cwd: string, policy: ProjectPolicy): void {
  * @param cwd Current working directory
  * @param grant Grant to add
  */
-export function addProjectGrant(cwd: string, grant: FsGrant | BashGrant): void {
+export function addProjectGrant(
+  cwd: string,
+  grant: FsGrant | BashGrant | MCPGrant,
+): void {
   updateProjectPermissions((current) => {
     // Add the new grant to existing grants
     return { grants: [...current.grants, grant] };
@@ -86,6 +89,5 @@ export function addProjectGrant(cwd: string, grant: FsGrant | BashGrant): void {
  * This is used internally by the permission resolver.
  */
 export function readProjectPolicy(cwd: string): ProjectPolicy {
-  const permissions = readProjectPermissions(cwd);
-  return { grants: permissions.grants };
+  return readProjectPermissions(cwd);
 }

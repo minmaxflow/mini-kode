@@ -3,7 +3,7 @@ import type { ApprovalMode } from "../config";
 import { readProjectPolicy } from "./persistent";
 import { isPathUnderPrefix } from "./pathChecker";
 import { getSessionPolicy } from "./session";
-import type { BashGrant, FsGrant } from "./types";
+import type { BashGrant, FsGrant, MCPGrant } from "./types";
 
 /**
  * Policy Resolver
@@ -295,5 +295,151 @@ export function checkBashApproval(
   return {
     ok: false,
     message: `Permission required to run: ${command}`,
+  };
+}
+
+/**
+ * Check if MCP tool/server access matches any MCP grants.
+ *
+ * @param serverName MCP server name
+ * @param toolName Optional specific tool name
+ * @param grants Array of MCP grants to check against
+ * @returns true if access matches any grant, false otherwise
+ */
+function checkMCPGrants(
+  serverName: string,
+  toolName: string | undefined,
+  grants: Array<MCPGrant>,
+): boolean {
+  for (const grant of grants) {
+    // Check server name match
+    if (grant.serverName !== serverName) {
+      continue;
+    }
+
+    // Server-level grant (all tools in server)
+    if (!grant.toolName) {
+      return true;
+    }
+
+    // Tool-level grant (specific tool)
+    if (grant.toolName === toolName) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Check session-level MCP permissions.
+ *
+ * Session permissions are stored in memory and provide fast access
+ * to MCP grants approved during the current session.
+ *
+ * @param serverName MCP server name
+ * @param toolName Optional specific tool name
+ * @returns true if session grants allow access, false otherwise
+ */
+function checkSessionMCPPermission(
+  serverName: string,
+  toolName?: string,
+): boolean {
+  const sessionPolicy = getSessionPolicy();
+  const mcpGrants = sessionPolicy.grants.filter(
+    (grant): grant is MCPGrant => grant.type === "mcp",
+  );
+  return checkMCPGrants(serverName, toolName, mcpGrants);
+}
+
+/**
+ * Check project-level MCP permissions.
+ *
+ * Project permissions are persisted to disk and survive across
+ * application restarts.
+ *
+ * @param cwd Current working directory (used to locate project config)
+ * @param serverName MCP server name
+ * @param toolName Optional specific tool name
+ * @returns true if project grants allow access, false otherwise
+ */
+function checkProjectMCPPermission(
+  cwd: string,
+  serverName: string,
+  toolName?: string,
+): boolean {
+  const projectPolicy = readProjectPolicy(cwd);
+  const mcpGrants = projectPolicy.grants.filter(
+    (grant): grant is MCPGrant => grant.type === "mcp",
+  );
+  return checkMCPGrants(serverName, toolName, mcpGrants);
+}
+
+/**
+ * Check MCP tool execution permission.
+ *
+ * Permission Resolution Order:
+ * 1. Check approval mode (yolo auto-approves)
+ * 2. Check session permissions (in-memory, fast access)
+ * 3. Check project permissions (persistent storage)
+ * 4. If no grant found, return permission denied
+ *
+ * Design Notes:
+ * - YOLO mode auto-approves all MCP tool access
+ * - Session permissions are checked first (in-memory, fast access)
+ * - Project permissions are checked as fallback (persistent storage)
+ * - Clear separation of concerns for better code readability
+ *
+ * @param cwd Current working directory
+ * @param serverName MCP server name
+ * @param toolName Optional specific tool name
+ * @param approvalMode Current approval mode
+ * @returns Permission result with ok flag and optional message
+ *
+ * @example
+ * ```typescript
+ * // YOLO mode: Auto-approve all MCP tools
+ * checkMCPPermission('/project', 'filesystem', 'read_file', 'yolo')
+ * // => { ok: true }
+ *
+ * // Session permission: Previously granted in current session
+ * checkMCPPermission('/project', 'filesystem', 'read_file', 'default')
+ * // => { ok: true } (found in session cache)
+ *
+ * // Project permission: Previously granted and persisted
+ * checkMCPPermission('/project', 'github', 'create_issue', 'default')
+ * // => { ok: true } (found in project config)
+ *
+ * // Requires permission: No grant found
+ * checkMCPPermission('/project', 'postgres', 'execute_query', 'default')
+ * // => { ok: false, message: "Permission required for MCP tool: postgres.execute_query" }
+ * ```
+ */
+export function checkMCPPermission(
+  cwd: string,
+  serverName: string,
+  toolName: string | undefined,
+  approvalMode: ApprovalMode,
+): { ok: true } | { ok: false; message: string } {
+  // YOLO mode: Auto-approve everything (including MCP tools)
+  if (approvalMode === "yolo") {
+    return { ok: true };
+  }
+
+  // Check session permissions first (in-memory, fast access)
+  if (checkSessionMCPPermission(serverName, toolName)) {
+    return { ok: true };
+  }
+
+  // Check project permissions as fallback (persistent storage)
+  if (checkProjectMCPPermission(cwd, serverName, toolName)) {
+    return { ok: true };
+  }
+
+  // No matching grant found
+  const toolDisplay = toolName ? `${serverName}.${toolName}` : serverName;
+  return {
+    ok: false,
+    message: `Permission required for MCP tool: ${toolDisplay}`,
   };
 }

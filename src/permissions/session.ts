@@ -1,4 +1,4 @@
-import type { BashGrant, FsGrant, ProjectPolicy } from "./types";
+import type { BashGrant, FsGrant, MCPGrant, ProjectPolicy } from "./types";
 
 /**
  * ========================================================================
@@ -25,7 +25,7 @@ import type { BashGrant, FsGrant, ProjectPolicy } from "./types";
  * 3. If no grant found, prompt user for approval
  */
 
-let sessionGrants: Array<FsGrant | BashGrant> = [];
+let sessionGrants: Array<FsGrant | BashGrant | MCPGrant> = [];
 
 /**
  * Add a grant to session permissions.
@@ -50,7 +50,7 @@ let sessionGrants: Array<FsGrant | BashGrant> = [];
  * });
  * ```
  */
-export function addSessionGrant(grant: FsGrant | BashGrant): void {
+export function addSessionGrant(grant: FsGrant | BashGrant | MCPGrant): void {
   sessionGrants.push(grant);
 }
 

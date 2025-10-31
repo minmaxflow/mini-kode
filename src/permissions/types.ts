@@ -32,10 +32,21 @@ export interface BashGrant extends BaseGrant {
 }
 
 /**
+ * MCP server/tool permission grant.
+ *
+ * Provides access to execute MCP tools from specific servers.
+ */
+export interface MCPGrant extends BaseGrant {
+  type: "mcp";
+  serverName: string; // MCP server name
+  toolName?: string; // Specific tool name, undefined means all tools in server
+}
+
+/**
  * Union type representing any type of permission grant.
  * Uses discriminated unions for type-safe access.
  */
-export type Grant = FsGrant | BashGrant;
+export type Grant = FsGrant | BashGrant | MCPGrant;
 
 /**
  * Project policy containing persistent grants.
