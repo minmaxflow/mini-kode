@@ -147,17 +147,15 @@ Use `${ENV_VAR}` syntax in `args` and `headers` for secure configuration. Mini-K
 ```json
 {
   "servers": {
-    "github": {
+    "context7": {
       "transport": "stdio",
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-github", "--token", "${GITHUB_TOKEN}"]
+      "args": ["-y", "@upstash/context7-mcp"]
     },
-    "api-server": {
-      "transport": "http",
-      "url": "https://api.example.com",
-      "headers": {
-        "Authorization": "Bearer ${API_KEY}"
-      }
+    "chrome-devtools": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
     }
   }
 }
