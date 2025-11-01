@@ -11,12 +11,10 @@ import { createDebugAppState } from "../debug/appStateDebug";
 import {
   isTerminalToolState,
   isTransientToolState,
-} from "../../tools/runner.types";
-import type {
   ToolCallRunning,
   ToolCallNonTerminal,
   ToolCallTerminal,
-} from "../../agent/types";
+} from "../../tools/runner.types";
 import { formatToolResultMessage } from "../../agent/formatters";
 import { CommandCall } from "../commands";
 import type { MCPServerState } from "../../mcp/client";
@@ -28,7 +26,9 @@ function updateMCPServers(
 ): MCPServerState[] {
   switch (action.type) {
     case "MCP_SERVER_UPDATE":
-      const existingIndex = servers.findIndex(s => s.name === action.payload.name);
+      const existingIndex = servers.findIndex(
+        (s) => s.name === action.payload.name,
+      );
       if (existingIndex !== -1) {
         // Update existing server
         return servers.map((s) =>
@@ -91,35 +91,35 @@ export type AppActions = ReturnType<typeof useAppState>["actions"];
  */
 type Action =
   | {
-      type: "START_REQUEST";
-      userMessage: string;
-    }
+    type: "START_REQUEST";
+    userMessage: string;
+  }
   | { type: "SET_GENERATING"; isLLMGenerating: boolean }
   | { type: "UPDATE_STREAMING_MESSAGE"; content: string }
   | { type: "COMPLETE_LLM_MESSAGE"; message: LLMMessage }
   | { type: "SET_ERROR"; error?: string }
   | { type: "ADD_TOOL_CALL"; toolCall: ToolCallRunning }
   | {
-      type: "UPDATE_TOOL_CALL";
-      toolCall: ToolCallNonTerminal;
-    }
+    type: "UPDATE_TOOL_CALL";
+    toolCall: ToolCallNonTerminal;
+  }
   | {
-      type: "COMPLETE_TOOL_CALL";
-      toolCall: ToolCallTerminal;
-    }
+    type: "COMPLETE_TOOL_CALL";
+    toolCall: ToolCallTerminal;
+  }
   | { type: "CYCLE_APPROVAL_MODE" }
   | { type: "EXECUTE_PROMPT"; prompt: string }
   | {
-      type: "ADD_COMMAND_CALL";
-      commandCall: CommandCall;
-    }
+    type: "ADD_COMMAND_CALL";
+    commandCall: CommandCall;
+  }
   | {
-      type: "COMPLETE_COMMAND_CALL";
-      commandCall: CommandCall;
-    }
+    type: "COMPLETE_COMMAND_CALL";
+    commandCall: CommandCall;
+  }
   | { type: "CLEAR_SESSION" }
   | { type: "UPDATE_TOKEN_USAGE"; tokenUsage: TokenUsage }
-  | { type: "MCP_SERVER_UPDATE"; payload: MCPServerState }
+  | { type: "MCP_SERVER_UPDATE"; payload: MCPServerState };
 
 /**
  * State reducer for managing App state transitions.
@@ -256,25 +256,27 @@ function reducer(state: AppState, action: Action): AppState {
 
     case "ADD_TOOL_CALL":
       // Runtime type check: ADD_TOOL_CALL should only receive ToolCallRunning (status: "executing")
-      if (action.toolCall.status !== "executing") {
+      const toolCall = action.toolCall;
+      // Type guard to ensure toolCall has status property
+      if (toolCall.status !== "executing") {
         throw new Error(
-          `ADD_TOOL_CALL: Expected status 'executing', but got '${action.toolCall.status}'. This indicates a bug in the callback system.`,
+          `ADD_TOOL_CALL: Expected status 'executing', but got '${toolCall.status}'. This indicates a bug in the callback system.`,
         );
       }
 
       // Check for duplicate tool calls
       const duplicateIndex = state.toolCalls.findIndex(
-        (call) => call.requestId === action.toolCall.requestId,
+        (call) => call.requestId === toolCall.requestId,
       );
       if (duplicateIndex !== -1) {
         throw new Error(
-          `ADD_TOOL_CALL: Tool call with requestId ${action.toolCall.requestId} already exists. This indicates a duplicate call or bug in the tool execution logic.`,
+          `ADD_TOOL_CALL: Tool call with requestId ${toolCall.requestId} already exists. This indicates a duplicate call or bug in the tool execution logic.`,
         );
       }
 
       return {
         ...state,
-        toolCalls: [...state.toolCalls, action.toolCall],
+        toolCalls: [...state.toolCalls, toolCall],
       };
 
     case "UPDATE_TOOL_CALL": {
@@ -294,31 +296,28 @@ function reducer(state: AppState, action: Action): AppState {
       // - UPDATE_TOOL_CALL: Non-terminal states, no message
       // - COMPLETE_TOOL_CALL: Terminal states only, auto-derives message
       //
+      const toolCall = action.toolCall;
 
       // Runtime type check: UPDATE_TOOL_CALL should only receive non-terminal states
-      if (!isTransientToolState(action.toolCall.status)) {
+      if (!isTransientToolState(toolCall.status)) {
         throw new Error(
-          `UPDATE_TOOL_CALL: Expected non-terminal status (pending, executing, permission_required), but got '${action.toolCall.status}'. This indicates a bug in the callback system.`,
+          `UPDATE_TOOL_CALL: Expected non-terminal status (pending, executing, permission_required), but got '${toolCall.status}'. This indicates a bug in the callback system.`,
         );
       }
 
       const existingCallIndex = state.toolCalls.findIndex(
-        (call) => call.requestId === action.toolCall.requestId,
+        (call) => call.requestId === toolCall.requestId,
       );
 
       if (existingCallIndex === -1) {
         throw new Error(
-          `UPDATE_TOOL_CALL: Tool call with requestId ${action.toolCall.requestId} not found. This indicates a bug in the tool execution logic.`,
+          `UPDATE_TOOL_CALL: Tool call with requestId ${toolCall.requestId} not found. This indicates a bug in the tool execution logic.`,
         );
       }
 
-      // Merge to get the updated tool call state
-      const existingCall = state.toolCalls[existingCallIndex];
-      const updatedCall = { ...existingCall, ...action.toolCall };
-
       // Update tool calls (no message addition for non-terminal states)
       const updatedToolCalls = state.toolCalls.map((call) =>
-        call.requestId === action.toolCall.requestId ? updatedCall : call,
+        call.requestId === toolCall.requestId ? toolCall : call,
       );
 
       return {
@@ -352,11 +351,12 @@ function reducer(state: AppState, action: Action): AppState {
       // - Ensures consistency (toolCall and message always in sync)
       // - Atomic updates (state + message in single reducer action)
       //
+      const toolCall = action.toolCall;
 
       // Runtime type check: COMPLETE_TOOL_CALL should only receive terminal states
-      if (!isTerminalToolState(action.toolCall.status)) {
+      if (!isTerminalToolState(toolCall.status)) {
         throw new Error(
-          `COMPLETE_TOOL_CALL: Expected terminal status (success, error, abort, permission_denied), but got '${action.toolCall.status}'. This indicates a bug in the callback system.`,
+          `COMPLETE_TOOL_CALL: Expected terminal status (success, error, abort, permission_denied), but got '${toolCall.status}'. This indicates a bug in the callback system.`,
         );
       }
 
@@ -369,14 +369,9 @@ function reducer(state: AppState, action: Action): AppState {
           `COMPLETE_TOOL_CALL: Tool call with requestId ${action.toolCall.requestId} not found. This indicates a bug in the tool execution logic.`,
         );
       }
-
-      // Merge to get the final tool call state
-      const existingCall = state.toolCalls[existingCallIndex];
-      const updatedCall = { ...existingCall, ...action.toolCall };
-
       // Update tool calls
       const updatedToolCalls = state.toolCalls.map((call) =>
-        call.requestId === action.toolCall.requestId ? updatedCall : call,
+        call.requestId === action.toolCall.requestId ? toolCall : call,
       );
 
       // Automatically derive and add tool message
@@ -385,17 +380,17 @@ function reducer(state: AppState, action: Action): AppState {
         (msg) =>
           msg.kind === "api" &&
           msg.message.role === "tool" &&
-          msg.message.tool_call_id === updatedCall.requestId,
+          msg.message.tool_call_id === toolCall.requestId,
       );
 
       if (messageExists) {
         throw new Error(
-          `COMPLETE_TOOL_CALL: Tool message already exists for tool_call_id ${updatedCall.requestId}. This indicates a duplicate call or bug in the tool execution logic.`,
+          `COMPLETE_TOOL_CALL: Tool message already exists for tool_call_id ${toolCall.requestId}. This indicates a duplicate call or bug in the tool execution logic.`,
         );
       }
 
       // Add the tool message
-      const toolMessage = formatToolResultMessage(updatedCall);
+      const toolMessage = formatToolResultMessage(toolCall);
       const toolLLMMessage = wrapAsLLMMessage(toolMessage);
       const updatedMessages = [...state.messages, toolLLMMessage];
 
@@ -494,9 +489,9 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
   const initialData = useDebugData
     ? createDebugAppState(false)
     : {
-        messages: [],
-        toolCalls: [],
-      };
+      messages: [],
+      toolCalls: [],
+    };
 
   /**
    * CRITICAL: Use ref to maintain stable currentApprovalMode reference across state updates
@@ -742,7 +737,6 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
         commandCall: commandCall,
       });
     }, []),
-
 
     /**
      * Update MCP server status
