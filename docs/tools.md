@@ -110,7 +110,7 @@ if (context.signal?.aborted) {
 
 **ToolCall** represents the runtime execution state that UI components render:
 
-````typescript
+```typescript
 type ToolCall = {
   requestId: string; // Unique tracking ID
   toolName: string; // Tool being executed
@@ -132,3 +132,4 @@ Mini-Kode supports **Model Context Protocol (MCP)** servers, allowing you to ext
 1. **Server Discovery**: Configure MCP servers in `.mini-kode/mcp.json`
 2. **Auto-registration**: Tools from connected servers are automatically registered
 3. **Execution Bridge**: MCP tools execute through the MCP client manager
+```

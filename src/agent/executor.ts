@@ -89,8 +89,6 @@ import {
   StreamingResponse,
   type TokenUsage,
 } from "../llm/client";
-import type { Session } from "../sessions/types";
-import { wrapAsLLMMessage } from "../sessions/types";
 import { formatToolResultMessage } from "./formatters";
 
 import { executeToolsWithPermission } from "./toolExecutor";

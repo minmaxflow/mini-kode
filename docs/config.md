@@ -162,6 +162,7 @@ Use `${ENV_VAR}` syntax in `args` and `headers` for secure configuration. Mini-K
 ```
 
 **How it works:**
+
 - `${ENV_VAR}` patterns in `args` and `headers` are automatically replaced with actual environment variable values
 - For stdio transport: environment variables are resolved in command arguments
 - For HTTP transport: environment variables are resolved in request headers

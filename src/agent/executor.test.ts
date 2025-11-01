@@ -332,6 +332,11 @@ describe("AgentExecutor", () => {
               startedAt: new Date().toISOString(),
               endedAt: new Date().toISOString(),
               input: { filePath: "/test/test.txt" },
+              result: {
+                isError: true,
+                isAborted: true,
+                message: "Aborted",
+              },
             };
           },
         );

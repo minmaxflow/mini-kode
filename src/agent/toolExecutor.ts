@@ -12,12 +12,16 @@ import { applyPermissionGrant } from "../tools/permissionRequest";
 import { runToolBatchConcurrent, executeSingleToolCall } from "../tools/runner";
 import { ToolExecutionContext, getToolsByName } from "../tools";
 import type { ParsedToolCall } from "../llm/client";
-import type { ToolCall, ToolName } from "../tools/runner.types";
 import type {
-  ExecutionContext,
-  ExecutionCallbacks,
+  ToolCall,
+  ToolCallPermissionRequired,
+  ToolCallRunning,
+  ToolCallPending,
+  ToolCallPermissionDenied,
   ToolCallTerminal,
-} from "./types";
+} from "../tools/runner.types";
+import { isToolCallTerminal } from "../tools/runner.types";
+import type { ExecutionContext, ExecutionCallbacks } from "./types";
 
 /**
  * Execute tools with permission handling and abort support.
@@ -84,13 +88,13 @@ export async function executeToolsWithPermission(
   if (calls.length === 0) return [];
 
   // Validate all tools and prepare tool calls
-  const toolCallsToExecute: ToolCall[] = [];
+  const toolCallsToExecute: ToolCallPending[] = [];
 
   const toolsByName = getToolsByName();
 
   for (let i = 0; i < calls.length; i++) {
     const call = calls[i];
-    const tool = toolsByName[call.name as ToolName];
+    const tool = toolsByName[call.name];
 
     if (!tool) {
       // Unknown tool - throw immediately
@@ -98,7 +102,7 @@ export async function executeToolsWithPermission(
     }
 
     toolCallsToExecute.push({
-      toolName: call.name as ToolName,
+      toolName: call.name,
       requestId: call.id,
       status: "pending" as const,
       input: call.arguments,
@@ -136,7 +140,7 @@ export async function executeToolsWithPermission(
  * This function optimizes for that assumption.
  */
 async function executeToolsConcurrently(
-  toolCalls: ToolCall[],
+  toolCalls: ToolCallPending[],
   context: ExecutionContext,
   callbacks: ExecutionCallbacks,
 ): Promise<ToolCall[]> {
@@ -149,10 +153,11 @@ async function executeToolsConcurrently(
 
   // Notify tool start for all tools before concurrent execution
   for (const toolCall of toolCalls) {
-    callbacks.onToolStart?.({
+    const executingCall: ToolCallRunning = {
       ...toolCall,
       status: "executing" as const,
-    });
+    };
+    callbacks.onToolStart?.(executingCall);
   }
 
   // Execute tools concurrently and process results immediately for progressive UI updates
@@ -180,8 +185,10 @@ async function executeToolsConcurrently(
 
     // Call onToolComplete for the final result
     // This ensures the UI gets the terminal state update
-    // Type assertion: concurrent execution should only return terminal states
-    callbacks.onToolComplete?.(result as ToolCallTerminal);
+    // concurrent execution should only return terminal states
+    if (isToolCallTerminal(result)) {
+      callbacks.onToolComplete?.(result as ToolCallTerminal);
+    }
   }
 
   return results;
@@ -193,7 +200,7 @@ async function executeToolsConcurrently(
  * This maintains data consistency by executing tools one by one in LLM order.
  */
 async function executeToolsSequentially(
-  toolCalls: ToolCall[],
+  toolCalls: ToolCallPending[],
   context: ExecutionContext,
   callbacks: ExecutionCallbacks,
 ): Promise<ToolCall[]> {
@@ -213,7 +220,7 @@ async function executeToolsSequentially(
           result: {
             isError: true,
             isAborted: true,
-            message: "Tool execution was aborted",
+            message: "Tool execution was interrupted by user",
           },
         };
         results[j] = abortedResult;
@@ -225,40 +232,41 @@ async function executeToolsSequentially(
     const toolCallToExecute = toolCalls[i];
 
     // Notify tool start
-    callbacks.onToolStart?.({
+    const executingCall: ToolCallRunning = {
       ...toolCallToExecute,
       status: "executing" as const,
-    });
+    };
+    callbacks.onToolStart?.(executingCall);
 
     // Execute single tool
-    const result = await executeSingleToolWithPermission(
+    const toolResult = await executeSingleToolWithPermission(
       toolCallToExecute,
       context,
       callbacks,
     );
 
-    results[i] = result;
+    results[i] = toolResult;
     // Call onToolComplete for the final result
     // This ensures the UI gets the terminal state update
-    callbacks.onToolComplete?.(result as ToolCallTerminal);
+    // Only call for terminal states
+    if (isToolCallTerminal(toolResult)) {
+      callbacks.onToolComplete?.(toolResult as ToolCallTerminal);
+    }
 
     // If permission was denied, stop execution and mark remaining tools as permission_denied
-    if (result.status === "permission_denied") {
+    if (toolResult.status === "permission_denied") {
       for (let j = i + 1; j < toolCalls.length; j++) {
         const remainingToolCall = toolCalls[j];
-        const deniedResult: ToolCall = {
+        // Create permission_denied tool call without result field
+        const deniedResult: ToolCallPermissionDenied = {
           ...remainingToolCall,
-          status: "permission_denied",
+          status: "permission_denied" as const,
           startedAt: new Date().toISOString(),
           endedAt: new Date().toISOString(),
-          result: {
-            isError: true,
-            message: "Previous tool was denied permission, execution stopped",
-          },
         };
         results[j] = deniedResult;
         // Notify UI about permission denied
-        callbacks.onToolComplete?.(deniedResult as ToolCallTerminal);
+        callbacks.onToolComplete?.(deniedResult);
       }
       break;
     }
@@ -271,7 +279,7 @@ async function executeToolsSequentially(
  * Execute a single tool with permission handling.
  */
 async function executeSingleToolWithPermission(
-  toolCallToExecute: ToolCall,
+  toolCallToExecute: ToolCallPending,
   context: ExecutionContext,
   callbacks: ExecutionCallbacks,
 ): Promise<ToolCall> {
@@ -287,12 +295,14 @@ async function executeSingleToolWithPermission(
 
   if (result.status === "permission_required") {
     // Handle permission request
+    // Create permission_required tool call without result field
+    const permissionRequiredCall: ToolCallPermissionRequired = {
+      ...toolCallToExecute,
+      status: "permission_required" as const,
+      uiHint: result.uiHint!,
+    };
     const finalResult = await handlePermissionRequest(
-      {
-        ...toolCallToExecute,
-        // pass the uiHint to the handlePermissionRequest function
-        uiHint: result.uiHint,
-      },
+      permissionRequiredCall,
       toolContext,
       callbacks,
     );
@@ -309,29 +319,33 @@ async function executeSingleToolWithPermission(
  * Processes one tool call at a time, requiring explicit user approval for each.
  */
 async function handlePermissionRequest(
-  toolCallToExecute: ToolCall,
+  toolCallToExecute: ToolCallPermissionRequired,
   toolContext: ToolExecutionContext,
   callbacks: ExecutionCallbacks,
 ): Promise<ToolCall> {
-  const uiHint = toolCallToExecute.uiHint!;
+  const uiHint = toolCallToExecute.uiHint;
 
   if (!callbacks.onPermissionRequired) {
     // No callback available, return permission_denied status
-    return {
+    // Create permission_denied tool call without result field
+    const deniedResult: ToolCallPermissionDenied = {
       ...toolCallToExecute,
-      status: "permission_denied",
+      status: "permission_denied" as const,
       endedAt: new Date().toISOString(),
     };
+    return deniedResult;
   }
 
   // Update UI to show permission prompt before asking for permission
   // This ensures the tool call is in the correct state when onPermissionRequired is called
   if (callbacks.onToolUpdate) {
-    callbacks.onToolUpdate({
+    // Create permission_required tool call without result field
+    const permissionRequiredCall: ToolCallPermissionRequired = {
       ...toolCallToExecute,
-      status: "permission_required",
+      status: "permission_required" as const,
       uiHint,
-    });
+    };
+    callbacks.onToolUpdate?.(permissionRequiredCall);
   }
 
   const decision = await callbacks.onPermissionRequired(
@@ -340,12 +354,14 @@ async function handlePermissionRequest(
   );
   if (!decision.approved) {
     // Return permission_denied status instead of throwing
-    return {
+    // Create permission_denied tool call without result field
+    const deniedResult: ToolCallPermissionDenied = {
       ...toolCallToExecute,
-      status: "permission_denied",
+      status: "permission_denied" as const,
       endedAt: new Date().toISOString(),
       rejectionReason: decision.reason,
     };
+    return deniedResult;
   }
 
   await applyPermissionGrant(uiHint, decision.option, toolContext.cwd);
@@ -355,11 +371,12 @@ async function handlePermissionRequest(
   // Note: This is important for the UI to show the correct tool status
   // Use onToolUpdate for non-terminal state changes (permission_required -> executing)
   if (callbacks.onToolUpdate) {
-    callbacks.onToolUpdate({
+    const executingCall: ToolCallRunning = {
       ...toolCallToExecute,
-      status: "executing",
+      status: "executing" as const,
       startedAt: new Date().toISOString(),
-    });
+    };
+    callbacks.onToolUpdate?.(executingCall);
   }
 
   // Retry the single tool execution after permission grant

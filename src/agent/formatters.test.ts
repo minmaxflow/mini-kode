@@ -72,6 +72,7 @@ describe("formatToolResultMessage", () => {
       startedAt: "2025-01-01T00:00:00Z",
       endedAt: "2025-01-01T00:00:01Z",
       input: { command: "ls" },
+      uiHint: { kind: "bash", command: "ls" },
     };
 
     expect(() => formatToolResultMessage(result)).toThrow(
@@ -87,6 +88,11 @@ describe("formatToolResultMessage", () => {
       startedAt: "2025-01-01T00:00:00Z",
       endedAt: "2025-01-01T00:00:01Z",
       input: { filePath: "/tmp/test.txt" },
+      result: {
+        isError: true,
+        isAborted: true,
+        message: "Tool execution was interrupted by user",
+      },
     };
 
     const message = formatToolResultMessage(result);
@@ -94,7 +100,7 @@ describe("formatToolResultMessage", () => {
     expect(message.role).toBe("tool");
 
     if (message.role === "tool") {
-      expect(message.content).toContain("[Interrupted by User]");
+      expect(message.content).toBe("Tool execution was interrupted by user");
     }
   });
 

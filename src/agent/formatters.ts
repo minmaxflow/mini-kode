@@ -23,19 +23,15 @@ export function formatToolResultMessage(
   // Format the result content based on status
   let content: string;
 
-  if (result.status === "success" && result.result) {
+  if (result.status === "success") {
     // Serialize successful result
     content = JSON.stringify(result.result, null, 2);
-  } else if (
-    result.status === "error" &&
-    result.result &&
-    "isError" in result.result
-  ) {
+  } else if (result.status === "error") {
     // Format error message from result
     content = `Error: ${result.result.message}`;
   } else if (result.status === "abort") {
     // Format abort message
-    content = `${result.result ? JSON.stringify(result.result, null, 2) : ""}\n\n[Interrupted by User]`;
+    content = result.result.message;
   } else if (result.status === "permission_denied") {
     // Format permission denied message
     content = `${result.toolName} was rejected by user`;
