@@ -1,14 +1,6 @@
-import type {
-  ArchitectResult,
-  BashResult,
-  FileEditResult,
-  FileReadResult,
-  GlobResult,
-  GrepResult,
-  ListFilesResult,
-  TodoResult,
-} from "./types";
 import type { PermissionUiHint } from "./types";
+
+export type { PermissionUiHint };
 
 /**
  * ========================================================================
@@ -86,48 +78,67 @@ export type ToolCallTerminalStatus =
  */
 export type ToolCallStatus = ToolCallTransientStatus | ToolCallTerminalStatus;
 
-export type ToolName =
-  | "bash"
-  | "fileRead"
-  | "listFiles"
-  | "grep"
-  | "glob"
-  | "fileEdit"
-  | "architect"
-  | "todo_read"
-  | "todo_write";
-
-export type ToolConcreteResult<T extends ToolName> = T extends "bash"
-  ? BashResult
-  : T extends "fileRead"
-    ? FileReadResult
-    : T extends "listFiles"
-      ? ListFilesResult
-      : T extends "grep"
-        ? GrepResult
-        : T extends "glob"
-          ? GlobResult
-          : T extends "fileEdit"
-            ? FileEditResult
-            : T extends "architect"
-              ? ArchitectResult
-              : T extends "todo_read"
-                ? TodoResult
-                : T extends "todo_write"
-                  ? TodoResult
-                  : never;
-
-export interface ToolCall<TName extends ToolName = ToolName> {
-  toolName: TName;
+type ToolCallBase = {
+  toolName: string;
   requestId: string;
-  status: ToolCallStatus;
-  input: Record<string, unknown>; // Tool input parameters
   startedAt: string;
   endedAt?: string;
-  result?: ToolConcreteResult<TName>;
-  uiHint?: PermissionUiHint;
+  input: Record<string, unknown>;
+};
+
+export type ToolCallResultSuccess = {
+  status: "success";
+  result: Record<string, unknown>;
+};
+
+export type ToolCallResultError = {
+  status: "error";
+  result: { isError: true; message: string };
+};
+
+export type ToolCallResultAbort = {
+  status: "abort";
+  result: { isError: true; isAborted: true; message: string };
+};
+
+export type ToolCallResultPermissionRequired = {
+  status: "permission_required";
+  result?: undefined;
+  uiHint: PermissionUiHint;
+};
+
+export type ToolCallResultPermissionDenied = {
+  status: "permission_denied";
+  result?: undefined;
   rejectionReason?: "user_rejected" | "timeout";
-}
+};
+
+export type ToolCallResultPending = {
+  status: "pending";
+  result?: undefined;
+};
+
+export type ToolCallResultRunning = {
+  status: "executing";
+  result?: undefined;
+};
+
+export type ToolCallPending = ToolCallBase & ToolCallResultPending;
+export type ToolCallRunning = ToolCallBase & ToolCallResultRunning;
+export type ToolCallPermissionRequired = ToolCallBase & ToolCallResultPermissionRequired;
+export type ToolCallPermissionDenied = ToolCallBase & ToolCallResultPermissionDenied;
+export type ToolCallSuccess = ToolCallBase & ToolCallResultSuccess;
+export type ToolCallError = ToolCallBase & ToolCallResultError;
+export type ToolCallAbort = ToolCallBase & ToolCallResultAbort;
+
+export type ToolCall =
+  | ToolCallPending
+  | ToolCallRunning
+  | ToolCallPermissionRequired
+  | ToolCallPermissionDenied
+  | ToolCallSuccess
+  | ToolCallError
+  | ToolCallAbort;
 
 /**
  * Check if a tool call status is a terminal state (final, immutable).

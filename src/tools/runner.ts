@@ -36,13 +36,24 @@ async function executeSingleTool(
     if ("isError" in result && result.isError === true) {
       // Check if this is an abort result
       const isAborted = "isAborted" in result && result.isAborted === true;
-      return {
-        ...toolCall,
-        status: isAborted ? "abort" : "error",
-        startedAt,
-        endedAt: nowIso(),
-        result: result,
-      };
+      
+      if (isAborted) {
+        return {
+          ...toolCall,
+          status: "abort",
+          startedAt,
+          endedAt: nowIso(),
+          result,
+        };
+      } else {
+        return {
+          ...toolCall,
+          status: "error",
+          startedAt,
+          endedAt: nowIso(),
+          result,
+        };
+      }
     }
 
     return {
@@ -60,6 +71,7 @@ async function executeSingleTool(
         startedAt,
         endedAt: nowIso(),
         uiHint: err.uiHint,
+        result: undefined,
       };
     }
     return {

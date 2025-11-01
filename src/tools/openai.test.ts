@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { toolToOpenAIFormat, allToolsToOpenAIFormat } from "./openai";
 import { ALL_TOOLS, getToolsByName } from "./index";
-import type { ToolName } from "./runner.types";
+
 import { FileReadTool } from "./fileRead";
 import { ListFilesTool } from "./listFiles";
 import { GrepTool } from "./grep";
@@ -34,7 +34,7 @@ describe("Tools Registry", () => {
   test("All tool names exist in mapping", () => {
     const toolsByName = getToolsByName();
     for (const tool of ALL_TOOLS) {
-      expect(toolsByName[tool.name as ToolName]).toBe(tool);
+      expect(toolsByName[tool.name]).toBe(tool);
     }
   });
 });
