@@ -107,6 +107,8 @@ Important notes:
 - If there are no changes to commit (i.e., no untracked files and no modifications), do not create an empty commit
 - Ensure your commit message is meaningful and concise. It should explain the purpose of the changes, not just describe them.
 - Return an empty response - the user will see the git output directly
+
+**CRITICAL REMINDER: NEVER automatically commit changes unless explicitly requested by the user.**
 `.trim();
 
 export const BashTool: Tool<BashInput, BashResult> = {
