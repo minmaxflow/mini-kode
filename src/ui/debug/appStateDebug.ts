@@ -213,13 +213,9 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
       startedAt: new Date(Date.now() - 3000).toISOString(),
       endedAt: new Date(Date.now() - 500).toISOString(),
       result: {
-        type: "bash",
-        command: "npm run build",
-        stdout: "Building...\nCompiling TypeScript files\nOptimizing bundles\n",
-        stderr: "",
-        exitCode: 143, // SIGTERM
-        truncated: false,
-        durationMs: 2500,
+        isError: true,
+        isAborted: true,
+        message: "Tool execution was aborted",
       },
     },
   ];
@@ -295,6 +291,11 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         input: { command: "sleep 30", timeout: 30000 },
         startedAt: new Date(Date.now() - 8000).toISOString(),
         endedAt: new Date(Date.now() - 7500).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // bash - permission_denied
       {
@@ -304,11 +305,6 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         input: { command: "rm -rf /important", timeout: 5000 },
         startedAt: new Date(Date.now() - 7000).toISOString(),
         endedAt: new Date(Date.now() - 6500).toISOString(),
-        uiHint: {
-          kind: "bash",
-          command: "rm -rf /important",
-          message: "bash requires permission for restricted operation",
-        },
         rejectionReason: "user_rejected",
       },
       // bash - timeout
@@ -319,11 +315,6 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         input: { command: "make build", timeout: 10000 },
         startedAt: new Date(Date.now() - 6800).toISOString(),
         endedAt: new Date(Date.now() - 600).toISOString(),
-        uiHint: {
-          kind: "bash",
-          command: "make build",
-          message: "bash requires permission for build operation",
-        },
         rejectionReason: "timeout",
       },
       // fileRead - success
@@ -355,7 +346,6 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         result: {
           isError: true,
           message: "File not found",
-          filePath: "/nonexistent.txt",
         },
       },
       // fileRead - abort
@@ -366,6 +356,11 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         input: { filePath: "/huge/file.txt", offset: 0, limit: 10000 },
         startedAt: new Date(Date.now() - 4000).toISOString(),
         endedAt: new Date(Date.now() - 3500).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // fileRead - permission_denied
       {
@@ -375,11 +370,6 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         input: { filePath: "/etc/shadow", offset: 0, limit: 10 },
         startedAt: new Date(Date.now() - 3000).toISOString(),
         endedAt: new Date(Date.now() - 2500).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/etc/shadow",
-          message: "fileRead requires permission for restricted operation",
-        },
       },
       // fileEdit - success
       {
@@ -488,7 +478,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         result: {
           isError: true,
           message: "File not found",
-          filePath: "/nonexistent.txt",
         },
       },
       // fileEdit - abort
@@ -499,6 +488,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { filePath: "/huge/file.txt" },
         startedAt: new Date(Date.now() - 1200).toISOString(),
         endedAt: new Date(Date.now() - 1100).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // fileEdit - permission_denied
       {
@@ -508,11 +502,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { filePath: "/etc/passwd" },
         startedAt: new Date(Date.now() - 1000).toISOString(),
         endedAt: new Date(Date.now() - 900).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/etc/passwd",
-          message: "fileEdit requires permission for restricted operation",
-        },
       },
       // grep - success
       {
@@ -557,6 +546,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { pattern: "slow", glob: "**/*", output_mode: "content" },
         startedAt: new Date(Date.now() - 400).toISOString(),
         endedAt: new Date(Date.now() - 300).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // grep - permission_denied
       {
@@ -566,11 +560,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { pattern: "secret", glob: "/etc/*", output_mode: "content" },
         startedAt: new Date(Date.now() - 200).toISOString(),
         endedAt: new Date(Date.now() - 100).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/etc/*",
-          message: "grep requires permission for restricted operation",
-        },
       },
       // listFiles - success
       {
@@ -611,6 +600,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { path: "/huge/directory" },
         startedAt: new Date(Date.now() - 10).toISOString(),
         endedAt: new Date(Date.now() - 5).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // listFiles - permission_denied
       {
@@ -620,11 +614,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { path: "/root" },
         startedAt: new Date(Date.now() - 4).toISOString(),
         endedAt: new Date(Date.now() - 3).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/root",
-          message: "listFiles requires permission for restricted operation",
-        },
       },
       // glob - success
       {
@@ -661,6 +650,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { pattern: "**/*" },
         startedAt: new Date(Date.now() - 0.7).toISOString(),
         endedAt: new Date(Date.now() - 0.6).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // glob - permission_denied
       {
@@ -670,11 +664,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { pattern: "/etc/*" },
         startedAt: new Date(Date.now() - 0.5).toISOString(),
         endedAt: new Date(Date.now() - 0.4).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/etc/*",
-          message: "glob requires permission for restricted operation",
-        },
       },
       // architect - success
       {
@@ -710,6 +699,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { prompt: "Very long analysis request" },
         startedAt: new Date(Date.now() - 0.05).toISOString(),
         endedAt: new Date(Date.now() - 0.04).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // architect - permission_denied
       {
@@ -719,11 +713,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: { prompt: "Analyze sensitive system files" },
         startedAt: new Date(Date.now() - 0.03).toISOString(),
         endedAt: new Date(Date.now() - 0.02).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/sensitive/system",
-          message: "architect requires permission for restricted operation",
-        },
       },
       // todo_read - success
       {
@@ -778,6 +767,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: {},
         startedAt: new Date(Date.now() - 0.007).toISOString(),
         endedAt: new Date(Date.now() - 0.006).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // todo_read - permission_denied
       {
@@ -787,11 +781,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         input: {},
         startedAt: new Date(Date.now() - 0.005).toISOString(),
         endedAt: new Date(Date.now() - 0.004).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/restricted/todo",
-          message: "todo_read requires permission for restricted operation",
-        },
       },
       // todo_write - success
       {
@@ -883,6 +872,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         },
         startedAt: new Date(Date.now() - 0.0003).toISOString(),
         endedAt: new Date(Date.now() - 0.0002).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
       },
       // todo_write - permission_denied
       {
@@ -894,11 +888,6 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         },
         startedAt: new Date(Date.now() - 0.0001).toISOString(),
         endedAt: new Date(Date.now() - 0.00005).toISOString(),
-        uiHint: {
-          kind: "fs",
-          path: "/restricted/todos",
-          message: "todo_write requires permission for restricted operation",
-        },
       },
     ];
 
