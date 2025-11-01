@@ -36,7 +36,7 @@ async function executeSingleTool(
     if ("isError" in result && result.isError === true) {
       // Check if this is an abort result
       const isAborted = "isAborted" in result && result.isAborted === true;
-      
+
       if (isAborted) {
         return {
           ...toolCall,

@@ -125,8 +125,10 @@ export type ToolCallResultRunning = {
 
 export type ToolCallPending = ToolCallBase & ToolCallResultPending;
 export type ToolCallRunning = ToolCallBase & ToolCallResultRunning;
-export type ToolCallPermissionRequired = ToolCallBase & ToolCallResultPermissionRequired;
-export type ToolCallPermissionDenied = ToolCallBase & ToolCallResultPermissionDenied;
+export type ToolCallPermissionRequired = ToolCallBase &
+  ToolCallResultPermissionRequired;
+export type ToolCallPermissionDenied = ToolCallBase &
+  ToolCallResultPermissionDenied;
 export type ToolCallSuccess = ToolCallBase & ToolCallResultSuccess;
 export type ToolCallError = ToolCallBase & ToolCallResultError;
 export type ToolCallAbort = ToolCallBase & ToolCallResultAbort;

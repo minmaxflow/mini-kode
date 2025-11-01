@@ -7,17 +7,17 @@
 
 /**
  * MCP server configuration
- * 
+ *
  * This type defines the configuration for connecting to an MCP server.
  * It supports stdio and HTTP transport types.
- * 
+ *
  * @example stdio transport with environment variable references in args
  * {
  *   "transport": "stdio",
  *   "command": "my-mcp-server",
  *   "args": ["--api-key", "${MCP_API_KEY}", "--database", "${DB_URL}"]
  * }
- * 
+ *
  * @example HTTP transport with environment variable references in headers
  * {
  *   "transport": "http",

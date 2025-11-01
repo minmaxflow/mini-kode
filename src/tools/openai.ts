@@ -27,7 +27,7 @@ export type OpenAITool = ChatCompletionFunctionTool;
  */
 export function toolToOpenAIFormat(tool: Tool<any, any>): OpenAITool {
   let parameters: Record<string, unknown>;
-  
+
   if (tool.jsonSchema) {
     // Use the provided JSON Schema directly
     parameters = tool.jsonSchema;
@@ -59,5 +59,3 @@ export function allToolsToOpenAIFormat(
 ): OpenAITool[] {
   return tools.map((tool) => toolToOpenAIFormat(tool));
 }
-
-

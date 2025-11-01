@@ -34,7 +34,7 @@ export interface MCPServerState {
 
 /**
  * Resolve environment variable references in strings
- * 
+ *
  * Supports ${ENV_VAR} syntax. If environment variable is not found,
  * the original reference is kept.
  */
@@ -49,13 +49,15 @@ function resolveEnvVars(value: string): string {
  */
 function resolveArgs(args: string[] | undefined): string[] {
   if (!args) return [];
-  return args.map(arg => resolveEnvVars(arg));
+  return args.map((arg) => resolveEnvVars(arg));
 }
 
 /**
  * Resolve environment variable references in headers
  */
-function resolveHeaders(headers: Record<string, string> | undefined): Record<string, string> {
+function resolveHeaders(
+  headers: Record<string, string> | undefined,
+): Record<string, string> {
   if (!headers) return {};
   const resolved: Record<string, string> = {};
   for (const [key, value] of Object.entries(headers)) {
@@ -67,7 +69,7 @@ function resolveHeaders(headers: Record<string, string> | undefined): Record<str
 export class MCPClientManager {
   private clients: Map<string, Client> = new Map();
   private states: Map<string, MCPServerState> = new Map();
-  
+
   /**
    * Callback for server state changes (used for UI updates)
    */
@@ -78,7 +80,7 @@ export class MCPClientManager {
    */
   private updateServerState(serverState: MCPServerState): void {
     this.states.set(serverState.name, serverState);
-    
+
     // Notify callback if set
     if (this.onServerStateChange) {
       this.onServerStateChange(serverState);
@@ -124,12 +126,10 @@ export class MCPClientManager {
     try {
       const transport = this.createTransport(name, config);
 
-      const client = new Client(
-        {
-          name: "mini-kode",
-          version: "0.1.1",
-        }
-      );
+      const client = new Client({
+        name: "mini-kode",
+        version: "0.1.1",
+      });
 
       await client.connect(transport);
 
@@ -164,10 +164,7 @@ export class MCPClientManager {
    * @returns Transport instance
    * @throws Error if transport configuration is invalid
    */
-  private createTransport(
-    name: string,
-    config: MCPServerConfig,
-  ) {
+  private createTransport(name: string, config: MCPServerConfig) {
     // Auto-detect transport type based on configuration
     const transportType = this.detectTransportType(config);
 

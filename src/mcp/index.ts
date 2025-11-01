@@ -75,7 +75,10 @@ export class MCPService {
     }
 
     // Create new initialization promise with progress callbacks
-    this.initializationPromise = this.doInitializeWithProgress(cwd, onServerStateChange);
+    this.initializationPromise = this.doInitializeWithProgress(
+      cwd,
+      onServerStateChange,
+    );
   }
 
   /**
@@ -125,7 +128,7 @@ export class MCPService {
 
       // Create MCP client manager with progress callbacks
       this.clientManager = new MCPClientManager();
-      
+
       // Set up server state change listener if provided
       if (onServerStateChange) {
         this.clientManager.onServerStateChange = onServerStateChange;

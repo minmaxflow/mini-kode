@@ -12,10 +12,7 @@
  * - Use MCP tool annotations for readonly hint
  */
 
-import type {
-  Tool,
-  ToolExecutionContext,
-} from "../tools/types";
+import type { Tool, ToolExecutionContext } from "../tools/types";
 import type { MCPTool, MCPClientManager } from "./client";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { PermissionRequiredError } from "../tools/types";
@@ -30,10 +27,10 @@ function extractToolResult(result: CallToolResult): string {
   // Try text content first
   if (result.content?.length) {
     const textContent = result.content
-      .filter(item => item.type === "text" && typeof item.text === "string")
-      .map(item => (item as { text: string }).text)
+      .filter((item) => item.type === "text" && typeof item.text === "string")
+      .map((item) => (item as { text: string }).text)
       .join("\n");
-    
+
     if (textContent) return textContent;
   }
 
@@ -57,10 +54,10 @@ export class MCPToolAdapter implements Tool<unknown, string> {
   ) {}
 
   /**
-   * Get tool name (delegates to MCP tool name)
+   * Get tool name formatted as "serverName - toolName (MCP)"
    */
   get name(): string {
-    return this.mcpTool.name;
+    return `${this.serverName} - ${this.mcpTool.name} (MCP)`;
   }
 
   /**
@@ -183,5 +180,3 @@ export function createMCPTools(
 
   return tools;
 }
-
-
