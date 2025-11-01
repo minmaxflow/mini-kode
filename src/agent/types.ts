@@ -10,33 +10,18 @@ import type { PermissionUiHint } from "../tools/types";
 import type { TokenUsage } from "../llm/client";
 import type { CommandCall } from "../ui/commands/command.types";
 import type {
-  ToolCall,
-  ToolCallTransientStatus,
-  ToolCallTerminalStatus,
+  ToolCallRunning,
+  ToolCallPending,
+  ToolCallPermissionRequired,
+  ToolCallSuccess,
+  ToolCallError,
+  ToolCallAbort,
+  ToolCallPermissionDenied,
+  ToolCallNonTerminal,
+  ToolCallTerminal,
 } from "../tools/runner.types";
 import type { ApprovalDecision } from "../tools/permissionRequest";
 import type { LLMMessage, Session } from "../sessions/types";
-
-/**
- * Tool call with running status for onToolStart callback.
- */
-export type ToolCallRunning = Omit<ToolCall, "status"> & {
-  status: "executing";
-};
-
-/**
- * Tool call with non-terminal status for onToolUpdate callback.
- */
-export type ToolCallNonTerminal = Omit<ToolCall, "status"> & {
-  status: ToolCallTransientStatus;
-};
-
-/**
- * Tool call with terminal status for onToolComplete callback.
- */
-export type ToolCallTerminal = Omit<ToolCall, "status"> & {
-  status: ToolCallTerminalStatus;
-};
 
 /**
  * Execution context for agent run.

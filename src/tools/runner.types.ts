@@ -143,6 +143,23 @@ export type ToolCall =
   | ToolCallAbort;
 
 /**
+ * Tool call with non-terminal status for onToolUpdate callback.
+ */
+export type ToolCallNonTerminal =
+  | ToolCallPending
+  | ToolCallRunning
+  | ToolCallPermissionRequired;
+
+/**
+ * Tool call with terminal status for onToolComplete callback.
+ */
+export type ToolCallTerminal =
+  | ToolCallSuccess
+  | ToolCallError
+  | ToolCallAbort
+  | ToolCallPermissionDenied;
+
+/**
  * Check if a tool call status is a terminal state (final, immutable).
  *
  * Terminal states indicate the tool has completed execution and will not change again.
