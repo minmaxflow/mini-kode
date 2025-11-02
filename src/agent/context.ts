@@ -16,7 +16,7 @@ interface EnvironmentInfo {
 function buildEnvironmentDetails(info: EnvironmentInfo): string {
   return `Here is useful information about the environment you are running in:
 <env>
-Working directory: ${info.cwd}
+Current working directory: ${info.cwd}
 Is directory a git repo: ${info.isGitRepo}
 Computer Platform: ${info.platform}
 Today's date: ${info.date}
