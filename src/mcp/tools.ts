@@ -12,7 +12,11 @@
  * - Use MCP tool annotations for readonly hint
  */
 
-import type { Tool, ToolExecutionContext } from "../tools/types";
+import type {
+  Tool,
+  ToolExecutionContext,
+  ToolErrorResult,
+} from "../tools/types";
 import type { MCPTool, MCPClientManager } from "./client";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { PermissionRequiredError } from "../tools/types";
@@ -20,33 +24,40 @@ import { checkMCPPermission } from "../permissions/policyResolver";
 import { z } from "zod";
 
 /**
- * Extract content from MCP tool result
- * Simplified version to handle the complex result structure
+ * Extract structured result from MCP tool execution
+ * Converts MCP tool results to a consistent structured format for LLM consumption
  */
-function extractToolResult(result: CallToolResult): string {
-  // Try text content first
-  if (result.content?.length) {
-    const textContent = result.content
-      .filter((item) => item.type === "text" && typeof item.text === "string")
-      .map((item) => (item as { text: string }).text)
-      .join("\n");
-
-    if (textContent) return textContent;
+function extractMCPToolResult(result: CallToolResult): Record<string, unknown> {
+  // Try structured content first (preferred for LLM)
+  if (result.structuredContent) {
+    return { structuredContent: result.structuredContent };
   }
 
-  // Fallback to structured content
-  if (result.structuredContent) {
-    return JSON.stringify(result.structuredContent);
+  // Fallback to text content
+  if (result.content?.length) {
+    const textContent = result.content
+      .filter(
+        (item): item is { type: "text"; text: string } =>
+          item.type === "text" && typeof item.text === "string",
+      )
+      .map((item) => item.text)
+      .join("\n");
+
+    if (textContent) {
+      return { textContent };
+    }
   }
 
   // Empty result
-  return "";
+  return { result: "MCP tool executed successfully" };
 }
 
 /**
  * Adapter that converts MCP tools to mini-kode's Tool interface
  */
-export class MCPToolAdapter implements Tool<unknown, string> {
+export class MCPToolAdapter
+  implements Tool<unknown, Record<string, unknown> | ToolErrorResult>
+{
   constructor(
     private mcpTool: MCPTool,
     private mcpClientManager: MCPClientManager,
@@ -54,9 +65,29 @@ export class MCPToolAdapter implements Tool<unknown, string> {
   ) {}
 
   /**
-   * Get tool name formatted as "serverName - toolName (MCP)"
+   * Get tool name formatted as "serverName_toolName_mcp" for OpenAI compatibility
    */
   get name(): string {
+    // Normalize tool name for OpenAI API (only alphanumeric, underscore, hyphen)
+    const normalizedToolName = this.mcpTool.name
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
+
+    const normalizedServerName = this.serverName
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
+
+    return `${normalizedServerName}_${normalizedToolName}_mcp`;
+  }
+
+  /**
+   * Get user-friendly display name
+   */
+  get displayName(): string {
     return `${this.serverName} - ${this.mcpTool.name} (MCP)`;
   }
 
@@ -105,44 +136,65 @@ export class MCPToolAdapter implements Tool<unknown, string> {
    *
    * @param input - Tool input parameters
    * @param context - Execution context (cwd, signal, etc.)
-   * @returns Tool execution result as string
+   * @returns Tool execution result
    * @throws Error if server is not connected or tool execution fails
    */
   async execute(
     input: unknown,
     context: ToolExecutionContext,
-  ): Promise<string> {
-    // Check MCP permission first
-    const permissionResult = checkMCPPermission(
-      context.cwd,
-      this.serverName,
-      this.mcpTool.name,
-      context.approvalMode,
-    );
+  ): Promise<Record<string, unknown> | ToolErrorResult> {
+    // Check abort signal at entry point
+    if (context.signal?.aborted) {
+      return { isError: true, isAborted: true, message: "Aborted" };
+    }
 
-    if (!permissionResult.ok) {
-      throw new PermissionRequiredError({
-        kind: "mcp",
-        serverName: this.serverName,
-        toolName: this.mcpTool.name,
-        message: permissionResult.message,
-      });
+    // Skip permission check for readonly tools
+    if (!this.readonly) {
+      // Check MCP permission first
+      const permissionResult = checkMCPPermission(
+        context.cwd,
+        this.serverName,
+        this.mcpTool.name,
+        context.approvalMode,
+      );
+
+      if (!permissionResult.ok) {
+        throw new PermissionRequiredError({
+          kind: "mcp",
+          serverName: this.serverName,
+          toolName: this.mcpTool.name,
+          displayName: this.displayName,
+          message: permissionResult.message,
+        });
+      }
+    }
+
+    // Check abort signal before expensive operation
+    if (context.signal?.aborted) {
+      return { isError: true, isAborted: true, message: "Aborted" };
     }
 
     // Get the MCP client for this server
     const client = this.mcpClientManager.getClient(this.serverName);
     if (!client) {
-      throw new Error(`MCP server '${this.serverName}' is not connected`);
+      return {
+        isError: true,
+        message: `MCP server '${this.serverName}' is not connected`,
+      };
     }
 
     // Call the MCP tool
-    const result = (await client.callTool({
-      name: this.mcpTool.name,
-      arguments: input as Record<string, unknown>,
-    })) as CallToolResult;
+    try {
+      const result = (await client.callTool({
+        name: this.mcpTool.name,
+        arguments: input as Record<string, unknown>,
+      })) as CallToolResult;
 
-    // Extract content from result
-    return extractToolResult(result);
+      // Extract structured result for LLM consumption
+      return extractMCPToolResult(result);
+    } catch (error) {
+      return { isError: true, message: `MCP tool execution failed: ${error}` };
+    }
   }
 }
 
@@ -159,8 +211,8 @@ export class MCPToolAdapter implements Tool<unknown, string> {
  */
 export function createMCPTools(
   mcpClientManager: MCPClientManager,
-): Tool<unknown, string>[] {
-  const tools: Tool<unknown, string>[] = [];
+): Tool<unknown, Record<string, unknown> | ToolErrorResult>[] {
+  const tools: Tool<unknown, Record<string, unknown> | ToolErrorResult>[] = [];
   const serverStates = mcpClientManager.getServerStates();
 
   // Iterate through all connected servers

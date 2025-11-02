@@ -23,7 +23,7 @@ import { executeAgent } from "../agent/executor";
 import type { ExecutionCallbacks, ExecutionContext } from "../agent/types";
 import type { ApprovalMode } from "../config";
 import { ConfigManager } from "../config";
-import type { PermissionUiHint } from "../tools/types";
+import type { PermissionUiHint } from "../permissions/types";
 import { createSession } from "../sessions/types";
 import { mcpService } from "../mcp";
 

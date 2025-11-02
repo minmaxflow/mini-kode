@@ -95,12 +95,17 @@ export class MCPService {
       }
 
       // Create and initialize MCP client manager
-      this.clientManager = new MCPClientManager();
-      await this.clientManager.initializeFromConfig(mcpConfig);
+      const clientManager = new MCPClientManager();
+      await clientManager.initializeFromConfig(mcpConfig);
 
-      // Create and register MCP tools
-      const mcpTools = createMCPTools(this.clientManager);
-      setMCPTools(mcpTools);
+      // Only set this.clientManager and create tools if we haven't been shut down
+      if (this.isInitialized === false) {
+        this.clientManager = clientManager;
+
+        // Create and register MCP tools
+        const mcpTools = createMCPTools(clientManager);
+        setMCPTools(mcpTools);
+      }
 
       this.isInitialized = true;
     } catch (error) {
@@ -127,18 +132,23 @@ export class MCPService {
       }
 
       // Create MCP client manager with progress callbacks
-      this.clientManager = new MCPClientManager();
+      const clientManager = new MCPClientManager();
 
       // Set up server state change listener if provided
       if (onServerStateChange) {
-        this.clientManager.onServerStateChange = onServerStateChange;
+        clientManager.onServerStateChange = onServerStateChange;
       }
 
-      await this.clientManager.initializeFromConfig(mcpConfig);
+      await clientManager.initializeFromConfig(mcpConfig);
 
-      // Create and register MCP tools
-      const mcpTools = createMCPTools(this.clientManager);
-      setMCPTools(mcpTools);
+      // Only set this.clientManager and create tools if we haven't been shut down
+      if (this.isInitialized === false) {
+        this.clientManager = clientManager;
+
+        // Create and register MCP tools
+        const mcpTools = createMCPTools(clientManager);
+        setMCPTools(mcpTools);
+      }
 
       this.isInitialized = true;
     } catch (error) {
