@@ -3,12 +3,10 @@ import { Box, Text } from "ink";
 
 import type { PermissionOption } from "../../permissions/types";
 import type { AppState, AppActions } from "../hooks/useAppState";
-import { HelpBar } from "./HelpBar";
 import { Logo } from "./Logo";
 import MessageFeed from "./MessageFeed";
 import { PromptInput } from "./PromptInput";
 import { getCurrentTheme } from "../theme";
-import type { LlmClient } from "../../llm/client";
 import { CommandName } from "../commands";
 
 export interface LayoutProps {
@@ -103,22 +101,6 @@ export function Layout({
               )}
             </Box>
           ))}
-        </Box>
-      )}
-
-      {/* Error message display */}
-      {state.error && (
-        <Box marginTop={1} flexDirection="column">
-          <Text color={getCurrentTheme().error}>{state.error}</Text>
-        </Box>
-      )}
-
-      {/* Loading indicator when LLM is generating */}
-      {!hasPermissionRequest && state.isLLMGenerating && (
-        <Box marginTop={1}>
-          <Text color={getCurrentTheme().brand}>
-            {loadingIcons[loadingIconIndex]} (Working... esc to cancel)
-          </Text>
         </Box>
       )}
 
