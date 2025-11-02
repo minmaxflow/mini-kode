@@ -155,7 +155,7 @@ Use `${ENV_VAR}` syntax in `args` and `headers` for secure configuration. Mini-K
     "chrome-devtools": {
       "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"]
+      "args": ["-y", "chrome-devtools-mcp@latest", "--isolated=true"]
     }
   }
 }

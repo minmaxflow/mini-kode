@@ -132,12 +132,12 @@ mini-kode config set approvalMode yolo
   "grants": [
     {
       "type": "fs",
-      "pattern": "/project/src",
+      "path": "/project/src",
       "grantedAt": "2025-10-02T10:30:00.000Z"
     },
     {
       "type": "bash",
-      "pattern": "npm:*",
+      "command": "npm:*",
       "grantedAt": "2025-10-02T10:31:00.000Z"
     }
   ]
