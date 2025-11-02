@@ -30,9 +30,17 @@ export const BASH_TOOL_PROMPT: string = `
 Executes a given bash command with optional timeout, ensuring proper handling and security measures.
 
 IMPORTANT: Platform Compatibility
-- Current platform information is available *<env>** tag
+- Current platform information is available <env> tag
 - macOS and Linux have different command syntaxes for some tools
 - ALWAYS check the platform and use appropriate syntax for the current platform.
+
+CRITICAL: Working Directory
+- Commands are executed in the current working directory (shown in <env> tag)
+- If your command operates in the current working directory, DO NOT use \`cd\` commands - they are unnecessary and inefficient
+- If you need to operate in a different directory:
+  - If the command supports directory parameters (like \`make -C\` or \`npm --prefix\`), use those with absolute paths
+  - If the command doesn't support directory parameters, you can use \`cd\` but MUST use absolute paths
+- All commands automatically start in the current working directory
 
 Before executing the command, please follow these steps:
 
@@ -65,8 +73,19 @@ Usage notes:
   <good-example>
   pytest /foo/bar/tests
   </good-example>
+  <good-example>
+  make build -C /different/directory
+  </good-example>
+  <good-example>
+  cd /different/directory && some-command-that-requires-cd
+  </good-example>
   <bad-example>
-  cd /foo/bar && pytest tests
+  cd /Users/minmaxflow/project/mini-kode && pnpm run test
+  # Current working directory is already /Users/minmaxflow/project/mini-kode
+  </bad-example>
+  <bad-example>
+  cd relative/path && some-command
+  # Always use absolute paths with cd
   </bad-example>
 
 # Committing changes with git
@@ -97,6 +116,28 @@ When the user asks you to create a new git commit, follow these steps carefully:
 5. If the commit fails due to pre-commit hook changes, retry the commit ONCE to include these automated changes. If it fails again, it usually means a pre-commit hook is preventing the commit. If the commit succeeds but you notice that files were modified by the pre-commit hook, you MUST amend your commit to include them.
 
 6. Finally, run git status to make sure the commit succeeded.
+
+CRITICAL: ABSOLUTELY NEVER commit changes unless the user explicitly asks you to. This is an ABSOLUTE RULE that must be followed without ANY exceptions.
+
+- UNDER NO CIRCUMSTANCES should you commit without explicit user instruction
+- If you complete a task and the user hasn't asked you to commit, DO NOT commit
+- If you think "this would be a good time to commit", DO NOT commit - this is a violation
+- If you finish implementing a feature, DO NOT commit
+- If you fix a bug, DO NOT commit
+- If you refactor code, DO NOT commit
+- If you write tests, DO NOT commit
+- If you update documentation, DO NOT commit
+
+THE ONLY time you should commit is when the user explicitly says "commit", "git commit", or gives a clear, direct instruction to commit changes. Vague suggestions or implied requests are NOT sufficient.
+
+VIOLATING THIS RULE WILL MAKE THE USER FEEL YOU ARE BEING TOO PROACTIVE, INTRUSIVE, AND DISRESPECTFUL OF THEIR WORKFLOW. This is one of the most important rules in this system and failure to follow it will result in poor user experience.
+
+CRITICAL: When committing, be extremely careful about what files you include:
+- If the user mentions specific files or folders, ONLY commit those specific files/folders
+- NEVER commit unrelated changes or files the user didn't explicitly mention
+- Always check \`git status\` and \`git diff\` to understand what changes will be committed
+- Use \`git add <specific-file>\` instead of \`git add .\` when user mentions specific files
+- If the user mentions a folder, only commit changes within that specific folder
 
 Important notes:
 - When possible, combine the "git add" and "git commit" commands into a single "git commit -am" command, to speed things up
