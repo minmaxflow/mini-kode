@@ -6,23 +6,26 @@ import type { BashGrant, FsGrant, MCPGrant, ProjectPolicy } from "./types";
  * ========================================================================
  *
  * Core workflow for permission grants during current application session.
+ * Session permissions are temporary and only exist for the current session.
  *
  * ## PERMISSION OPTIONS
  *
- * - "once": Session only
- * - "remember-prefix": Session + Persistent
- * - "remember-all": Session + Persistent
+ * - "once": Session only (temporary, lost on restart)
+ * - "remember-*": Project only (persistent, survives restart)
  *
  * ## STORAGE LOCATIONS
  *
  * - **Session**: `sessionGrants` array (in-memory, lost on restart)
- * - **Persistent**: .mini-kode/config.json (file, survives restart)
+ *   - Only contains "once" permissions
+ * - **Persistent**: .mini-kode/permissions.json (file, survives restart)
+ *   - Contains "remember-*" permissions
  *
  * ## PERMISSION CHECK
  *
- * 1. Check `sessionGrants` first (in-memory, fast)
- * 2. If no match, check .mini-kode/config.json (persistent)
- * 3. If no grant found, prompt user for approval
+ * 1. Check approval mode (yolo/autoEdit auto-approve)
+ * 2. Check session permissions (in-memory, fast, only "once" grants)
+ * 3. Check project permissions (file-based, always fresh, "remember-*" grants)
+ * 4. If no grant found, prompt user for approval
  */
 
 let sessionGrants: Array<FsGrant | BashGrant | MCPGrant> = [];
@@ -37,15 +40,16 @@ let sessionGrants: Array<FsGrant | BashGrant | MCPGrant> = [];
  *
  * @example
  * ```typescript
+ * // Session grants are only for "once" permissions
  * addSessionGrant({
  *   type: "fs",
- *   pattern: "/project/src",
+ *   path: "/project/src",
  *   grantedAt: new Date().toISOString(),
  * });
  *
  * addSessionGrant({
  *   type: "bash",
- *   pattern: "npm:*",
+ *   command: "npm:*",
  *   grantedAt: new Date().toISOString(),
  * });
  * ```

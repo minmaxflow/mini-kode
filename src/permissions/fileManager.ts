@@ -7,7 +7,13 @@
 
 import fs from "fs";
 
-import type { Grant, ProjectPolicy } from "./types";
+import type {
+  BashGrant,
+  FsGrant,
+  Grant,
+  MCPGrant,
+  ProjectPolicy,
+} from "./types";
 import { ProjectPaths } from "../utils/paths";
 
 /**
@@ -47,12 +53,24 @@ export function readProjectPermissions(
         grant &&
         typeof grant === "object" &&
         typeof grant.type === "string" &&
-        typeof grant.pattern === "string" &&
         typeof grant.grantedAt === "string"
       ) {
-        // Only accept known grant types
-        if (grant.type === "fs" || grant.type === "bash") {
-          validGrants.push(grant as Grant);
+        // Validate based on grant type
+        if (grant.type === "fs") {
+          // FS grants require path field
+          if (typeof grant.path === "string") {
+            validGrants.push(grant as FsGrant);
+          }
+        } else if (grant.type === "bash") {
+          // Bash grants require command field
+          if (typeof grant.command === "string") {
+            validGrants.push(grant as BashGrant);
+          }
+        } else if (grant.type === "mcp") {
+          // MCP grants require serverName field
+          if (typeof grant.serverName === "string") {
+            validGrants.push(grant as MCPGrant);
+          }
         }
       }
     }

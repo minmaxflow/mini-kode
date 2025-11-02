@@ -8,7 +8,8 @@
 // Core permission checking functions
 export { checkFsPermission, checkBashApproval } from "./policyResolver";
 export { isPathUnderPrefix } from "./pathChecker";
-export { validateBashCommand } from "./bashValidator";
+export { validateBashCommand } from "./commandValidator";
+export { extractMainCommand, extractCommandPrefix } from "./commandParser";
 
 // Session management
 export {

@@ -1,9 +1,11 @@
+import path from "path";
 import type { ApprovalMode } from "../config";
 
 import { readProjectPolicy } from "./persistent";
 import { isPathUnderPrefix } from "./pathChecker";
 import { getSessionPolicy } from "./session";
 import type { BashGrant, FsGrant, MCPGrant } from "./types";
+import { extractMainCommand } from "./commandParser";
 
 /**
  * Policy Resolver
@@ -29,12 +31,12 @@ import type { BashGrant, FsGrant, MCPGrant } from "./types";
 function checkFsGrants(targetPath: string, grants: Array<FsGrant>): boolean {
   for (const grant of grants) {
     // Global grant marker
-    if (grant.pattern === "*") {
+    if (grant.path === "*") {
       return true;
     }
 
     // Prefix matching
-    if (isPathUnderPrefix(targetPath, grant.pattern)) {
+    if (isPathUnderPrefix(targetPath, grant.path)) {
       return true;
     }
   }
@@ -86,14 +88,14 @@ function checkProjectFsPermission(cwd: string, targetPath: string): boolean {
  * Permission Resolution Order:
  * 1. Check approval mode (yolo/autoEdit auto-approve)
  * 2. Check internal .mini-kode directory access
- * 3. Check session permissions (in-memory, fast)
- * 4. Check project permissions (persistent, disk-based)
+ * 3. Check session permissions (in-memory, fast, only "once" grants)
+ * 4. Check project permissions (persistent, disk-based, always fresh)
  * 5. If no grant found, return permission denied
  *
  * Design Notes:
  * - Read operations are auto-allowed (consistent with fileRead tool)
  * - Session permissions are checked first (in-memory, fast access)
- * - Project permissions are checked as fallback (persistent storage)
+ * - Project permissions are checked from file (always fresh, no caching)
  * - Clear separation of concerns for better code readability
  *
  * @param cwd Current working directory (used to locate project config)
@@ -154,7 +156,7 @@ export function checkFsPermission(
   }
 
   // No grant found - show relative path in UI
-  const relativePath = targetPath.replace(cwd, ".");
+  const relativePath = path.relative(cwd, targetPath);
   return {
     ok: false,
     message: `Permission required to modify: ${relativePath}`,
@@ -169,8 +171,10 @@ export function checkFsPermission(
  * @returns true if command matches any grant pattern, false otherwise
  */
 function checkBashGrants(command: string, grants: Array<BashGrant>): boolean {
+  const mainCommand = extractMainCommand(command);
+  
   for (const grant of grants) {
-    const commandPattern = grant.pattern;
+    const commandPattern = grant.command;
 
     // Global grant marker
     if (commandPattern === "*") {
@@ -181,12 +185,12 @@ function checkBashGrants(command: string, grants: Array<BashGrant>): boolean {
     if (commandPattern.endsWith(":*")) {
       const prefix = commandPattern.slice(0, -2); // Remove ':*'
       // Match "npm" or "npm <args>"
-      if (command === prefix || command.startsWith(prefix + " ")) {
+      if (mainCommand === prefix || mainCommand.startsWith(prefix + " ")) {
         return true;
       }
     }
     // Exact match
-    else if (command === commandPattern) {
+    else if (mainCommand === commandPattern) {
       return true;
     }
   }
@@ -234,8 +238,8 @@ function checkProjectBashPermission(cwd: string, command: string): boolean {
  *
  * Permission Resolution Order:
  * 1. Check approval mode (yolo auto-approves)
- * 2. Check session permissions (in-memory, fast access)
- * 3. Check project permissions (persistent storage)
+ * 2. Check session permissions (in-memory, fast access, only "once" grants)
+ * 3. Check project permissions (persistent, disk-based, always fresh)
  * 4. If no grant found, return permission denied
  *
  * Matching Rules:
@@ -245,7 +249,7 @@ function checkProjectBashPermission(cwd: string, command: string): boolean {
  *
  * Design Notes:
  * - Session permissions are checked first (in-memory, fast access)
- * - Project permissions are checked as fallback (persistent storage)
+ * - Project permissions are checked from file (always fresh, no caching)
  * - Clear separation of concerns for better code readability
  *
  * @param cwd Current working directory
@@ -322,8 +326,8 @@ function checkMCPGrants(
       return true;
     }
 
-    // Tool-level grant (specific tool)
-    if (grant.toolName === toolName) {
+    // Tool-level grant (specific tool) - only match if toolName is provided and matches
+    if (toolName && grant.toolName === toolName) {
       return true;
     }
   }
@@ -380,14 +384,14 @@ function checkProjectMCPPermission(
  *
  * Permission Resolution Order:
  * 1. Check approval mode (yolo auto-approves)
- * 2. Check session permissions (in-memory, fast access)
- * 3. Check project permissions (persistent storage)
+ * 2. Check session permissions (in-memory, fast access, only "once" grants)
+ * 3. Check project permissions (persistent, disk-based, always fresh)
  * 4. If no grant found, return permission denied
  *
  * Design Notes:
  * - YOLO mode auto-approves all MCP tool access
  * - Session permissions are checked first (in-memory, fast access)
- * - Project permissions are checked as fallback (persistent storage)
+ * - Project permissions are checked from file (always fresh, no caching)
  * - Clear separation of concerns for better code readability
  *
  * @param cwd Current working directory

@@ -75,11 +75,11 @@ export type BashValidation =
  *
  * Checks:
  * 1. Non-empty command
- * 2. Blacklisted commands
+ * 2. Blacklisted commands in ALL parts of compound commands
  *
  * Design Notes:
  * - Allows pipes, redirection, environment variables, &&, ||, ;
- * - Checks only the first token of the command
+ * - Checks the first token of EACH part in compound commands
  *
  * Future Enhancements:
  * - Configurable blacklist
@@ -104,27 +104,41 @@ export type BashValidation =
  */
 export function validateBashCommand(command: string): BashValidation {
   // Check for empty command
-  if (!command || typeof command !== "string") {
+  if (!command || typeof command !== "string" || !command.trim()) {
     return { allowed: false, reason: "Empty command" };
   }
 
-  // Extract first token (the actual command to execute)
-  // This handles cases like:
-  // - "npm install" → "npm"
-  // - "ENV=val ls -la" → "ENV=val" (will fail, but that's ok - user should fix)
-  // - "cd dir && npm run build" → "cd" (first command in chain)
-  const trimmed = command.trim();
-  const firstToken = trimmed.split(/\s+/)[0];
+  // Handle compound commands with &&, ||, ;
+  const compoundSeparators = /\s*&&\s*|\s*\|\|\s*|\s*;\s*/;
+  const parts = command.split(compoundSeparators);
+  
+  let hasValidCommand = false;
+  
+  // Check each part of the compound command
+  for (const part of parts) {
+    const trimmedPart = part.trim();
+    if (!trimmedPart) continue; // Skip empty parts
+    
+    hasValidCommand = true;
+    
+    // Extract first token of this part
+    const firstToken = trimmedPart.split(/\s+/)[0];
 
-  // Check against blacklist
-  if (BANNED_COMMANDS.has(firstToken)) {
-    const rationale = BANNED_COMMANDS.get(firstToken)!;
-    return {
-      allowed: false,
-      reason: `Command '${firstToken}' is banned: ${rationale}`,
-    };
+    // Check against blacklist
+    if (BANNED_COMMANDS.has(firstToken)) {
+      const rationale = BANNED_COMMANDS.get(firstToken)!;
+      return {
+        allowed: false,
+        reason: `Command '${firstToken}' is banned: ${rationale}`,
+      };
+    }
   }
 
-  // Command passes all checks
+  // If no valid commands found (e.g., only empty parts), return false
+  if (!hasValidCommand) {
+    return { allowed: false, reason: "Empty command" };
+  }
+
+  // All commands pass checks
   return { allowed: true };
 }

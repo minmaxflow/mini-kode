@@ -14,6 +14,13 @@ import {
  * survive across application restarts. These permissions represent user
  * choices to "remember" access for future sessions.
  *
+ * ## PERMISSION CHECK FLOW
+ *
+ * 1. Check approval mode (yolo/autoEdit auto-approve)
+ * 2. Check session permissions (in-memory, only "once" grants)
+ * 3. Check project permissions (file-based, always fresh, "remember-*" grants)
+ * 4. If no grant found, prompt user for approval
+ *
  * ## STORAGE DETAILS
  *
  * - **Location**: .mini-kode/permissions.json in project root
@@ -24,20 +31,20 @@ import {
  * ## PERMISSION GRANT TYPES
  *
  * ### File System (FS) Grants:
- * - Pattern: File path pattern (e.g., "/project/src", "/project/src/*.ts")
- * - Global: "*" pattern grants access to all files
+ * - Path: File path or directory path (e.g., "/project/src", "/project/src/app.ts")
+ * - Global: "*" path grants access to all files
  * - Examples:
- *   - { type: "fs", pattern: "/project/src" } - Access to entire src directory
- *   - { type: "fs", pattern: "/project/src/app.ts" } - Access to specific file
- *   - { type: "fs", pattern: "*" } - Global file system access
+ *   - { type: "fs", path: "/project/src/" } - Access to entire src directory
+ *   - { type: "fs", path: "/project/src/app.ts" } - Access to specific file
+ *   - { type: "fs", path: "*" } - Global file system access
  *
  * ### Bash Grants:
- * - Pattern: Command pattern (e.g., "npm:*", "git status", "*")
- * - Global: "*" pattern grants access to all bash commands
+ * - Command: Command pattern (e.g., "npm:*", "git status", "*")
+ * - Global: "*" command grants access to all bash commands
  * - Examples:
- *   - { type: "bash", pattern: "npm:*" } - All npm commands
- *   - { type: "bash", pattern: "git status" } - Specific git command
- *   - { type: "bash", pattern: "*" } - Global bash access
+ *   - { type: "bash", command: "npm:*" } - All npm commands
+ *   - { type: "bash", command: "git status" } - Specific git command
+ *   - { type: "bash", command: "*" } - Global bash access
  *
  * ## CONFIGURATION FILE FORMAT
  *
@@ -46,27 +53,17 @@ import {
  *   "grants": [
  *     {
  *       "type": "fs",
- *       "pattern": "/project/src",
+ *       "path": "/project/src",
  *       "grantedAt": "2024-01-01T12:00:00.000Z"
  *     },
  *     {
  *       "type": "bash",
- *       "pattern": "npm:*",
+ *       "command": "npm:*",
  *       "grantedAt": "2024-01-01T12:00:00.000Z"
  *     }
  *   ]
  * }
  */
-
-/**
- * Save project policy to permissions file.
- *
- * @param cwd Current working directory
- * @param policy Project policy to save
- */
-export function writeProjectPolicy(cwd: string, policy: ProjectPolicy): void {
-  writeProjectPermissions({ grants: policy.grants }, cwd);
-}
 
 /**
  * Add a grant to the project permissions file (persistent storage).

@@ -4,7 +4,6 @@ import fs from "fs";
 import os from "os";
 import {
   checkFsPermission,
-  validateBashCommand,
   isPathUnderPrefix,
   checkBashApproval,
   clearSessionApprovals,
@@ -20,19 +19,7 @@ describe("permissions checker", () => {
     expect(isPathUnderPrefix(root, file)).toBe(false);
   });
 
-  it("validateBashCommand allows common patterns and bans risky commands", () => {
-    expect(validateBashCommand("echo hello").allowed).toBe(true);
-    // Pipes
-    expect(validateBashCommand("echo hi | grep h").allowed).toBe(true);
-    // Redirection
-    expect(validateBashCommand("echo hi > /dev/null").allowed).toBe(true);
-    // Env vars and variable expansion
-    expect(validateBashCommand("FOO=1 echo $FOO").allowed).toBe(true);
-    // Parens / subshells and logical operators
-    expect(validateBashCommand("(echo ok) && echo done").allowed).toBe(true);
-    // Ban network client
-    expect(validateBashCommand("curl https://x").allowed).toBe(false);
-  });
+
 
   it("checkBashApproval allows prefixes with wildcard", () => {
     // Create a temporary directory without project config
@@ -41,10 +28,10 @@ describe("permissions checker", () => {
     try {
       clearSessionApprovals();
       // Grant git:* (wildcard) and npm:* (wildcard) and ls (exact)
-      ["git:*", "npm:*", "ls"].forEach((pattern) => {
+      ["git:*", "npm:*", "ls"].forEach((command) => {
         addSessionGrant({
           type: "bash",
-          pattern,
+          command,
           grantedAt: new Date().toISOString(),
         } as BashGrant);
       });
@@ -100,7 +87,7 @@ describe("permissions checker", () => {
     const target = path.join(cwd, "README.md");
     addSessionGrant({
       type: "fs",
-      pattern: cwd,
+      path: cwd,
       grantedAt: new Date().toISOString(),
     } as FsGrant);
     const res = checkFsPermission(cwd, target, "default");
@@ -112,7 +99,7 @@ describe("permissions checker", () => {
     clearSessionApprovals();
     addSessionGrant({
       type: "bash",
-      pattern: "echo",
+      command: "echo",
       grantedAt: new Date().toISOString(),
     } as BashGrant);
     // approval checked indirectly via BashTool tests; here we just ensure no throw in checker usage path

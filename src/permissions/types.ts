@@ -18,7 +18,7 @@ interface BaseGrant {
  */
 export interface FsGrant extends BaseGrant {
   type: "fs";
-  pattern: string; // File path pattern, e.g., "/project/src" or "*" for global access
+  path: string; // Directory path, e.g., "/project/src" (folder) or "*" (global access)
 }
 
 /**
@@ -28,7 +28,7 @@ export interface FsGrant extends BaseGrant {
  */
 export interface BashGrant extends BaseGrant {
   type: "bash";
-  pattern: string; // Command pattern, e.g., "npm:*", "git status" or "*" for global access
+  command: string; // Command pattern, e.g., "npm:*" or "*" for global access
 }
 
 /**
@@ -54,3 +54,35 @@ export type Grant = FsGrant | BashGrant | MCPGrant;
 export type ProjectPolicy = {
   grants: Array<Grant>;
 };
+
+/**
+ * UI hint for permission prompts.
+ * Provides contextual information to display to users when requesting permission.
+ */
+export type PermissionUiHint =
+  | { kind: "fs"; path: string; message?: string }
+  | { kind: "bash"; command: string; message?: string }
+  | {
+      kind: "mcp";
+      serverName: string;
+      toolName: string;
+      displayName: string;
+      message?: string;
+    };
+
+/**
+ * Permission grant scope options with discriminated unions for different grant types.
+ */
+export type PermissionOption =
+  | { kind: "once" }
+  | { kind: "fs"; scope: "directory" | "global" }
+  | { kind: "bash"; scope: "command" | "prefix" | "global" }
+  | { kind: "mcp"; scope: "tool" | "server" }
+  | { kind: "reject" };
+
+/**
+ * User's approval decision for a permission request.
+ */
+export type ApprovalDecision =
+  | { approved: true; option: PermissionOption }
+  | { approved: false; reason: "user_rejected" | "timeout" };
