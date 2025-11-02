@@ -4,13 +4,19 @@ import { extractMainCommand, extractCommandPrefix } from "./commandParser";
 describe("commandParser", () => {
   describe("extractMainCommand", () => {
     it("should extract main command from compound commands with &&", () => {
-      expect(extractMainCommand("cd /path && npm run test")).toBe("npm run test");
+      expect(extractMainCommand("cd /path && npm run test")).toBe(
+        "npm run test",
+      );
       expect(extractMainCommand("cd /path && ls -la")).toBe("ls -la");
-      expect(extractMainCommand("export VAR=value && npm install")).toBe("npm install");
+      expect(extractMainCommand("export VAR=value && npm install")).toBe(
+        "npm install",
+      );
     });
 
     it("should extract main command from compound commands with ||", () => {
-      expect(extractMainCommand("cd /path || npm run build")).toBe("npm run build");
+      expect(extractMainCommand("cd /path || npm run build")).toBe(
+        "npm run build",
+      );
     });
 
     it("should extract main command from compound commands with ;", () => {
@@ -18,8 +24,12 @@ describe("commandParser", () => {
     });
 
     it("should handle multiple compound operators", () => {
-      expect(extractMainCommand("cd /path && export VAR=value && npm run test")).toBe("npm run test");
-      expect(extractMainCommand("cd /path; export VAR=value; npm run build")).toBe("npm run build");
+      expect(
+        extractMainCommand("cd /path && export VAR=value && npm run test"),
+      ).toBe("npm run test");
+      expect(
+        extractMainCommand("cd /path; export VAR=value; npm run build"),
+      ).toBe("npm run build");
     });
 
     it("should return simple commands unchanged", () => {
@@ -35,7 +45,9 @@ describe("commandParser", () => {
     });
 
     it("should trim whitespace", () => {
-      expect(extractMainCommand("  cd /path && npm run test  ")).toBe("npm run test");
+      expect(extractMainCommand("  cd /path && npm run test  ")).toBe(
+        "npm run test",
+      );
       expect(extractMainCommand("  ls -la  ")).toBe("ls -la");
     });
 
@@ -45,9 +57,17 @@ describe("commandParser", () => {
     });
 
     it("should handle complex real-world examples", () => {
-      expect(extractMainCommand("cd /Users/minmaxflow/project/mini-kode && pnpm run lint")).toBe("pnpm run lint");
-      expect(extractMainCommand("cd /project && npm install && npm run test")).toBe("npm run test");
-      expect(extractMainCommand("export NODE_ENV=test && npm run test:coverage")).toBe("npm run test:coverage");
+      expect(
+        extractMainCommand(
+          "cd /Users/minmaxflow/project/mini-kode && pnpm run lint",
+        ),
+      ).toBe("pnpm run lint");
+      expect(
+        extractMainCommand("cd /project && npm install && npm run test"),
+      ).toBe("npm run test");
+      expect(
+        extractMainCommand("export NODE_ENV=test && npm run test:coverage"),
+      ).toBe("npm run test:coverage");
     });
   });
 
@@ -60,7 +80,9 @@ describe("commandParser", () => {
 
     it("should extract prefix from compound commands", () => {
       expect(extractCommandPrefix("cd /path && npm run test")).toBe("npm");
-      expect(extractCommandPrefix("export VAR=value && pnpm install")).toBe("pnpm");
+      expect(extractCommandPrefix("export VAR=value && pnpm install")).toBe(
+        "pnpm",
+      );
       expect(extractCommandPrefix("cd /path && git push")).toBe("git");
     });
 

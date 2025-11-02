@@ -408,6 +408,24 @@ function reducer(state: AppState, action: Action): AppState {
       };
 
     case "COMPLETE_COMMAND_CALL":
+      // For /compact command, keep only recent messages to prevent performance issues
+      if (action.commandCall.commandName === "/compact" && action.commandCall.status === "success") {
+        // Keep only the last 20 messages (including the compact command itself)
+        // This prevents React/Ink rendering performance issues with large message lists
+        const recentMessages = state.messages.slice(-20);
+        const updatedMessages = recentMessages.map((m) => {
+          if (m.kind === "cmd" && m.callId === action.commandCall.callId) {
+            return action.commandCall;
+          }
+          return m;
+        });
+        return {
+          ...state,
+          messages: updatedMessages,
+        };
+      }
+      
+      // For other commands, just update the command call
       const updatedMessages = state.messages.map((m) => {
         if (m.kind === "cmd" && m.callId === action.commandCall.callId) {
           return action.commandCall;

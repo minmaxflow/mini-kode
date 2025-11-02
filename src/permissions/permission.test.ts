@@ -19,8 +19,6 @@ describe("permissions checker", () => {
     expect(isPathUnderPrefix(root, file)).toBe(false);
   });
 
-
-
   it("checkBashApproval allows prefixes with wildcard", () => {
     // Create a temporary directory without project config
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "mini-kode-test-"));

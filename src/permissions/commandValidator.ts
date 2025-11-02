@@ -111,16 +111,16 @@ export function validateBashCommand(command: string): BashValidation {
   // Handle compound commands with &&, ||, ;
   const compoundSeparators = /\s*&&\s*|\s*\|\|\s*|\s*;\s*/;
   const parts = command.split(compoundSeparators);
-  
+
   let hasValidCommand = false;
-  
+
   // Check each part of the compound command
   for (const part of parts) {
     const trimmedPart = part.trim();
     if (!trimmedPart) continue; // Skip empty parts
-    
+
     hasValidCommand = true;
-    
+
     // Extract first token of this part
     const firstToken = trimmedPart.split(/\s+/)[0];
 

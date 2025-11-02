@@ -22,12 +22,16 @@ describe("commandValidator", () => {
 
     it("should allow commands with environment variables", () => {
       expect(validateBashCommand("FOO=1 echo $FOO").allowed).toBe(true);
-      expect(validateBashCommand("NODE_ENV=test npm run test").allowed).toBe(true);
+      expect(validateBashCommand("NODE_ENV=test npm run test").allowed).toBe(
+        true,
+      );
     });
 
     it("should allow commands with subshells and logical operators", () => {
       expect(validateBashCommand("(echo ok) && echo done").allowed).toBe(true);
-      expect(validateBashCommand("test -f file.txt || echo missing").allowed).toBe(true);
+      expect(
+        validateBashCommand("test -f file.txt || echo missing").allowed,
+      ).toBe(true);
     });
 
     it("should ban network clients", () => {
@@ -38,15 +42,25 @@ describe("commandValidator", () => {
     });
 
     it("should ban GUI browsers", () => {
-      expect(validateBashCommand("chrome http://example.com").allowed).toBe(false);
-      expect(validateBashCommand("firefox http://example.com").allowed).toBe(false);
-      expect(validateBashCommand("safari http://example.com").allowed).toBe(false);
+      expect(validateBashCommand("chrome http://example.com").allowed).toBe(
+        false,
+      );
+      expect(validateBashCommand("firefox http://example.com").allowed).toBe(
+        false,
+      );
+      expect(validateBashCommand("safari http://example.com").allowed).toBe(
+        false,
+      );
     });
 
     it("should ban text browsers that may hang", () => {
-      expect(validateBashCommand("lynx http://example.com").allowed).toBe(false);
+      expect(validateBashCommand("lynx http://example.com").allowed).toBe(
+        false,
+      );
       expect(validateBashCommand("w3m http://example.com").allowed).toBe(false);
-      expect(validateBashCommand("links http://example.com").allowed).toBe(false);
+      expect(validateBashCommand("links http://example.com").allowed).toBe(
+        false,
+      );
     });
 
     it("should ban shell state modification commands", () => {
@@ -55,40 +69,72 @@ describe("commandValidator", () => {
 
     it("should check ALL parts of compound commands with &&", () => {
       // Safe compound commands
-      expect(validateBashCommand("cd /path && npm run test").allowed).toBe(true);
-      expect(validateBashCommand("export VAR=value && ls -la").allowed).toBe(true);
-      
+      expect(validateBashCommand("cd /path && npm run test").allowed).toBe(
+        true,
+      );
+      expect(validateBashCommand("export VAR=value && ls -la").allowed).toBe(
+        true,
+      );
+
       // Dangerous compound commands - should be banned
-      expect(validateBashCommand("cd /path && curl http://evil.com").allowed).toBe(false);
-      expect(validateBashCommand("curl http://evil.com && npm install").allowed).toBe(false);
+      expect(
+        validateBashCommand("cd /path && curl http://evil.com").allowed,
+      ).toBe(false);
+      expect(
+        validateBashCommand("curl http://evil.com && npm install").allowed,
+      ).toBe(false);
     });
 
     it("should check ALL parts of compound commands with ||", () => {
       // Safe compound commands
-      expect(validateBashCommand("test -f file.txt || echo missing").allowed).toBe(true);
-      
+      expect(
+        validateBashCommand("test -f file.txt || echo missing").allowed,
+      ).toBe(true);
+
       // Dangerous compound commands - should be banned
-      expect(validateBashCommand("cd /path || telnet localhost").allowed).toBe(false);
-      expect(validateBashCommand("test -f file.txt || wget http://evil.com").allowed).toBe(false);
+      expect(validateBashCommand("cd /path || telnet localhost").allowed).toBe(
+        false,
+      );
+      expect(
+        validateBashCommand("test -f file.txt || wget http://evil.com").allowed,
+      ).toBe(false);
     });
 
     it("should check ALL parts of compound commands with ;", () => {
       // Safe compound commands
-      expect(validateBashCommand("cd /path; npm install; npm run build").allowed).toBe(true);
-      
+      expect(
+        validateBashCommand("cd /path; npm install; npm run build").allowed,
+      ).toBe(true);
+
       // Dangerous compound commands - should be banned
-      expect(validateBashCommand("npm install; wget http://evil.com").allowed).toBe(false);
-      expect(validateBashCommand("echo start; curl http://evil.com").allowed).toBe(false);
+      expect(
+        validateBashCommand("npm install; wget http://evil.com").allowed,
+      ).toBe(false);
+      expect(
+        validateBashCommand("echo start; curl http://evil.com").allowed,
+      ).toBe(false);
     });
 
     it("should handle multiple compound operators", () => {
       // Safe compound commands
-      expect(validateBashCommand("cd /path && export VAR=value && npm run test").allowed).toBe(true);
-      expect(validateBashCommand("cd /path; export VAR=value; npm run build").allowed).toBe(true);
-      
+      expect(
+        validateBashCommand("cd /path && export VAR=value && npm run test")
+          .allowed,
+      ).toBe(true);
+      expect(
+        validateBashCommand("cd /path; export VAR=value; npm run build")
+          .allowed,
+      ).toBe(true);
+
       // Dangerous compound commands - should be banned
-      expect(validateBashCommand("cd /path && npm install && curl http://evil.com").allowed).toBe(false);
-      expect(validateBashCommand("npm install; git status; wget http://evil.com").allowed).toBe(false);
+      expect(
+        validateBashCommand("cd /path && npm install && curl http://evil.com")
+          .allowed,
+      ).toBe(false);
+      expect(
+        validateBashCommand("npm install; git status; wget http://evil.com")
+          .allowed,
+      ).toBe(false);
     });
 
     it("should handle empty commands", () => {
@@ -97,8 +143,12 @@ describe("commandValidator", () => {
     });
 
     it("should handle whitespace", () => {
-      expect(validateBashCommand("  cd /path && npm run test  ").allowed).toBe(true);
-      expect(validateBashCommand("  curl http://evil.com  ").allowed).toBe(false);
+      expect(validateBashCommand("  cd /path && npm run test  ").allowed).toBe(
+        true,
+      );
+      expect(validateBashCommand("  curl http://evil.com  ").allowed).toBe(
+        false,
+      );
     });
   });
 });

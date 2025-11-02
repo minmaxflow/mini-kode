@@ -137,11 +137,9 @@ async function triggerAutomaticCompression(
   callbacks.onAddCommandCall?.(commandCall);
 
   try {
-    // Filter to get only LLM messages for processing (skip system message)
-    const llmMessages = conversationHistory.filter(
-      (msg): msg is ChatCompletionMessageParam =>
-        msg.role === "user" || msg.role === "assistant",
-    );
+    // Skip only the system message (first message) for compression
+    // Keep all user, assistant, and tool messages for context
+    const llmMessages = conversationHistory.slice(1);
 
     // Build summary prompt using shared utility
     const summaryPrompt = buildSummaryPrompt(

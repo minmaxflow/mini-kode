@@ -69,7 +69,6 @@ describe("ToolCall component", () => {
       requestId: "ok",
       status: "success",
       result: {
-
         path: "/test",
         entries: [{ name: "file.txt", kind: "file" }],
         total: 1,

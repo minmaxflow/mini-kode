@@ -172,7 +172,7 @@ export function checkFsPermission(
  */
 function checkBashGrants(command: string, grants: Array<BashGrant>): boolean {
   const mainCommand = extractMainCommand(command);
-  
+
   for (const grant of grants) {
     const commandPattern = grant.command;
 
