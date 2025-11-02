@@ -85,7 +85,7 @@ export const ArchitectTool: Tool<ArchitectInput, ArchitectResult> = {
         }
       }
 
-      return { type: "architect", plan: fullResponse };
+      return { plan: fullResponse };
     } catch (error) {
       return {
         isError: true,

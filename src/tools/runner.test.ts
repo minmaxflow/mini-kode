@@ -195,7 +195,7 @@ describe("runner", () => {
     // Grant approval and retry
     addSessionGrant({
       type: "bash",
-      pattern: "echo:*",
+      command: "echo:*",
       grantedAt: new Date().toISOString(),
     });
     const result2 = await executeSingleToolCall(

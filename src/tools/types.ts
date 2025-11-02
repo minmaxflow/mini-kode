@@ -1,13 +1,9 @@
 import { z } from "zod";
 
 import type { ApprovalMode } from "../config";
+import type { PermissionUiHint } from "../permissions/types";
 
 export type ReadonlyFlag = true | false;
-
-export type PermissionUiHint =
-  | { kind: "fs"; path: string; message?: string }
-  | { kind: "bash"; command: string; message?: string }
-  | { kind: "mcp"; serverName: string; toolName: string; message?: string };
 
 /**
  * Permission required error thrown when a tool needs user approval.
@@ -52,11 +48,20 @@ export interface ToolExecutionContext {
   sessionId: string;
 }
 
-export interface Tool<Input, Output> {
+export interface Tool<
+  Input,
+  Output extends Record<string, unknown> | ToolErrorResult,
+> {
   name: string;
   description: string;
   readonly: ReadonlyFlag;
   inputSchema: z.ZodType<Input>;
+  /**
+   * Display name for the tool.
+   * This is used for UI display instead of the actual tool name.
+   * Provides user-friendly names for all tools.
+   */
+  displayName: string;
   /**
    * Optional JSON Schema for the tool input.
    * If provided, this will be used directly instead of converting from Zod schema.
@@ -115,7 +120,6 @@ export interface Tool<Input, Output> {
 
 export type BashResult =
   | {
-      type: "bash";
       command: string;
       stdout: string;
       stderr: string;
@@ -127,7 +131,6 @@ export type BashResult =
 
 export type FileReadResult =
   | {
-      type: "fileRead";
       filePath: string;
       content: string;
       offset: number;
@@ -141,7 +144,6 @@ export type ListFilesEntry = { name: string; kind: "file" | "dir" };
 
 export type ListFilesResult =
   | {
-      type: "listFiles";
       path: string;
       entries: ListFilesEntry[];
       total: number;
@@ -152,7 +154,6 @@ export type GrepMatch = { filePath: string; line: string; lineNumber: number };
 
 export type GrepResult =
   | {
-      type: "grep";
       matches: GrepMatch[];
       pattern: string;
       include?: string;
@@ -162,7 +163,6 @@ export type GrepResult =
 
 export type GlobResult =
   | {
-      type: "glob";
       pattern: string;
       path?: string;
       files: string[];
@@ -170,7 +170,6 @@ export type GlobResult =
   | ToolErrorResult;
 
 export type FileEditSuccessType = {
-  type: "fileEdit";
   filePath: string;
   mode: "create" | "update";
   success: true;
@@ -192,7 +191,6 @@ export type FileEditResult = FileEditSuccessType | FileEditFailure;
 
 export type ArchitectResult =
   | {
-      type: "architect";
       plan: string;
     }
   | ToolErrorResult;
@@ -207,7 +205,6 @@ export type TodoItem = {
 
 export type TodoResult =
   | {
-      type: "todo_read" | "todo_write";
       todos: TodoItem[];
     }
   | ToolErrorResult;
@@ -216,14 +213,11 @@ export type TodoResult =
  * Helper types for success results only
  * These exclude error states and are used in UI components that only handle success cases
  */
-export type FileReadSuccess = Extract<FileReadResult, { type: "fileRead" }>;
-export type ListFilesSuccess = Extract<ListFilesResult, { type: "listFiles" }>;
-export type GrepSuccess = Extract<GrepResult, { type: "grep" }>;
-export type GlobSuccess = Extract<GlobResult, { type: "glob" }>;
-export type ArchitectSuccess = Extract<ArchitectResult, { type: "architect" }>;
-export type TodoSuccess = Extract<
-  TodoResult,
-  { type: "todo_read" | "todo_write" }
->;
+export type FileReadSuccess = Exclude<FileReadResult, ToolErrorResult>;
+export type ListFilesSuccess = Exclude<ListFilesResult, ToolErrorResult>;
+export type GrepSuccess = Exclude<GrepResult, ToolErrorResult>;
+export type GlobSuccess = Exclude<GlobResult, ToolErrorResult>;
+export type ArchitectSuccess = Exclude<ArchitectResult, ToolErrorResult>;
+export type TodoSuccess = Exclude<TodoResult, ToolErrorResult>;
 export type FileEditSuccess = FileEditSuccessType;
-export type BashSuccess = Extract<BashResult, { type: "bash" }>;
+export type BashSuccess = Exclude<BashResult, ToolErrorResult>;

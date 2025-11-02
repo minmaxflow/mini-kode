@@ -115,7 +115,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(abs, input.new_string, "utf8");
       return {
-        type: "fileEdit",
         filePath: abs,
         mode: "create",
         success: true,
@@ -171,7 +170,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
     noteFileReadForEdit(abs, after);
 
     return {
-      type: "fileEdit",
       filePath: abs,
       mode: "update",
       success: true,

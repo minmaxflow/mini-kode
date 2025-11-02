@@ -133,7 +133,6 @@ export const GrepTool: Tool<GrepInput, GrepResult> = {
     }
 
     return {
-      type: "grep",
       matches,
       pattern: input.pattern,
       glob: input.glob,

@@ -15,7 +15,7 @@ describe("GlobTool", () => {
     if ("isError" in res) {
       throw new Error("unexpected error in glob tool");
     }
-    expect(res.type).toBe("glob");
+    expect(res.pattern).toBe("*.md");
     expect(res.files.length).toBe(1);
   });
 

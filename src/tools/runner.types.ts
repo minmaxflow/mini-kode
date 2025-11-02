@@ -1,4 +1,4 @@
-import type { PermissionUiHint } from "./types";
+import type { PermissionUiHint } from "../permissions/types";
 
 export type { PermissionUiHint };
 

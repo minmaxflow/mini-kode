@@ -48,7 +48,7 @@ export const ListFilesTool: Tool<ListFilesInput, ListFilesResult> = {
         const kind: "file" | "dir" = s.isDirectory() ? "dir" : "file";
         return { name, kind };
       });
-      return { type: "listFiles", path: abs, entries, total: entries.length };
+      return { path: abs, entries, total: entries.length };
     } catch (err) {
       return { isError: true, message: "Failed to list directory" };
     }

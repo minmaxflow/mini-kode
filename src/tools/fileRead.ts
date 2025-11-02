@@ -100,7 +100,6 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
       const truncated = Boolean(limit && end < totalLines);
 
       return {
-        type: "fileRead",
         filePath: absolute,
         content: slice,
         offset: start,

@@ -30,7 +30,7 @@ async function executeSingleTool(
     const tool = toolsByName[toolCall.toolName]!;
 
     // cast input to any to avoid type errors
-    const result = await tool.execute(toolCall.input as any, execContext);
+    const result = await tool.execute(toolCall.input, execContext);
 
     // Check if tool returned a business logic error
     if ("isError" in result && result.isError === true) {

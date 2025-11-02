@@ -212,7 +212,6 @@ async function runCommand(
     });
     child.on("close", (code) => {
       resolveOnce({
-        type: "bash",
         command,
         stdout,
         stderr,

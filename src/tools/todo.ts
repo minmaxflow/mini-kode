@@ -88,13 +88,13 @@ export const TodoReadTool: Tool<z.infer<typeof TodoReadInput>, TodoResult> = {
       return { isError: true, isAborted: true, message: "Aborted" };
     const file = todosPath(context.cwd, context.sessionId);
     try {
-      if (!fs.existsSync(file)) return { type: "todo_read", todos: [] };
+      if (!fs.existsSync(file)) return { todos: [] };
       if (context.signal?.aborted)
         return { isError: true, isAborted: true, message: "Aborted" };
       const raw = fs.readFileSync(file, "utf8");
       const parsed = JSON.parse(raw);
       const todos = Array.isArray(parsed) ? (parsed as TodoItem[]) : [];
-      return { type: "todo_read", todos };
+      return { todos };
     } catch {
       return { isError: true, message: "Failed to read todos" };
     }
@@ -129,7 +129,6 @@ export const TodoWriteTool: Tool<z.infer<typeof TodoWriteInput>, TodoResult> = {
         return { isError: true, isAborted: true, message: "Aborted" };
       fs.renameSync(tmp, file);
       return {
-        type: "todo_write",
         todos: input.todos,
       };
     } catch {

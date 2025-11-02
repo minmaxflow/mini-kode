@@ -60,6 +60,6 @@ export const GlobTool: Tool<GlobInput, GlobResult> = {
 
     const files = filesWithStats.map((f: { path: string }) => f.path);
 
-    return { type: "glob", pattern: input.pattern, path: root, files };
+    return { pattern: input.pattern, path: root, files };
   },
 };
