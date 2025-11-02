@@ -81,8 +81,10 @@ export function PromptInput({
 
   const [isExternalEditing, setIsExternalEditing] = useState<boolean>(false);
 
-  const [showDetailedHelp, setShowDetailedHelp] = useState<boolean>(false);
   const [escTips, setEscTips] = useState<string | undefined>(undefined);
+
+  // Help mode state - triggered by ? at the beginning of input
+  const [helpMode, setHelpMode] = useState<boolean>(false);
 
   // Timeout ref for escTips message display
   const escTipsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -427,6 +429,12 @@ export function PromptInput({
         }
       }
 
+      // Handle ESC key to exit help mode
+      if (helpMode && key.escape) {
+        setHelpMode(false);
+        return;
+      }
+
       // Handle Shift+Tab for approval mode cycling
       if (key.shift && key.tab) {
         onCycleApprovalMode();
@@ -467,12 +475,6 @@ export function PromptInput({
         (key.ctrl && (input === "e" || input === "E"))
       ) {
         handleExternalEditor();
-        return;
-      }
-
-      // Handle Ctrl+A for help toggle
-      if (key.ctrl && (input === "a" || input === "A")) {
-        setShowDetailedHelp((v) => !v);
         return;
       }
 
@@ -519,6 +521,13 @@ export function PromptInput({
         // Clear any existing errors when user starts typing
         if (state.error) {
           actions.setError(undefined);
+        }
+
+        // Check for ? at the beginning of input to trigger help mode
+        if (normalizedInput === "?" && currentValue.length === 0 && currentCursor === 0) {
+          // Activate help mode and don't add ? to the input
+          setHelpMode(m => !m);
+          return;
         }
 
         // Check for @ input to trigger mention mode
@@ -591,7 +600,8 @@ export function PromptInput({
       {!shouldShowCommandPalette && !shouldShowSelector && (
         <HelpBar
           approvalMode={state.currentApprovalMode}
-          showDetailedHelp={showDetailedHelp}
+          helpMode={helpMode}
+          mcp={state.mcp}
           message={escTips}
           tokenUsage={state.tokenUsage}
         />

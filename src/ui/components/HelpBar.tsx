@@ -1,7 +1,47 @@
 import { Box, Text } from "ink";
 
 import type { ApprovalMode } from "../../config";
+import type { MCPServerState } from "../../mcp/client";
 import { getCurrentTheme } from "../theme";
+
+// MCP status indicator component
+interface MCPStatusProps {
+  mcp: MCPServerState[];
+}
+
+function MCPStatus({ mcp }: MCPStatusProps) {
+  if (mcp.length === 0) {
+    return null;
+  }
+
+  const connected = mcp.filter(s => s.status === "connected").length;
+  const connecting = mcp.filter(s => s.status === "connecting").length;
+  const error = mcp.filter(s => s.status === "error").length;
+
+  return (
+    <Box flexDirection="row" alignItems="center" gap={1}>
+      <Text dimColor>MCP:</Text>
+      {connected > 0 && (
+        <Box flexDirection="row" alignItems="center" gap={1}>
+          <Text dimColor color={getCurrentTheme().success}>●</Text>
+          <Text dimColor>{connected}</Text>
+        </Box>
+      )}
+      {connecting > 0 && (
+        <Box flexDirection="row" alignItems="center" gap={1}>
+          <Text dimColor color={getCurrentTheme().warning}>●</Text>
+          <Text dimColor>{connecting}</Text>
+        </Box>
+      )}
+      {error > 0 && (
+        <Box flexDirection="row" alignItems="center" gap={1}>
+          <Text dimColor color={getCurrentTheme().error}>●</Text>
+          <Text dimColor>{error}</Text>
+        </Box>
+      )}
+    </Box>
+  );
+}
 
 // Token usage color thresholds (percentage of 128K context window)
 const TOKEN_COLOR_THRESHOLDS = {
@@ -12,7 +52,8 @@ const TOKEN_COLOR_THRESHOLDS = {
 export interface HelpBarProps {
   message?: string; // current message to show
   approvalMode?: ApprovalMode; // current approval mode
-  showDetailedHelp?: boolean;
+  helpMode?: boolean;
+  mcp?: MCPServerState[]; // MCP servers state
   tokenUsage?: {
     total_tokens: number;
   };
@@ -30,11 +71,18 @@ const getStatusMessage = (approvalMode?: ApprovalMode) => {
 export function HelpBar({
   message,
   approvalMode,
-  showDetailedHelp = false,
+  helpMode = false,
+  mcp = [],
   tokenUsage,
 }: HelpBarProps) {
   const statusMessage = getStatusMessage(approvalMode);
-  const rightMessage = message ?? "ctrl+a for help";
+
+  // Determine what to show on the right side
+  const rightContent = message ? (
+    <Text dimColor>{message}</Text>
+  ) : (
+    <MCPStatus mcp={mcp} />
+  );
 
   // Format token display
   const formatTokenDisplay = (tokens: number): string => {
@@ -42,9 +90,9 @@ export function HelpBar({
     return `${Math.round(tokens / 1000)}K`;
   };
 
-  const getTokenColor = (tokens: number): string => {
+  const getTokenColor = (tokens: number): string | undefined => {
     if (tokens < TOKEN_COLOR_THRESHOLDS.WARNING)
-      return getCurrentTheme().success; // < 80% - green
+      return undefined; // < 80% - green
     if (tokens < TOKEN_COLOR_THRESHOLDS.ERROR) return getCurrentTheme().warning; // 80-90% - yellow
     return getCurrentTheme().error; // > 90% - red
   };
@@ -63,39 +111,9 @@ export function HelpBar({
 
   return (
     <Box width="100%" flexDirection="column" paddingX={1}>
-      {/* Main help bar */}
-      <Box width="100%" flexDirection="row" justifyContent="space-between">
-        <Box flexShrink={0} marginRight={2}>
-          {statusMessage && (
-            <Text
-              color={
-                approvalMode === "autoEdit"
-                  ? getCurrentTheme().warning
-                  : approvalMode === "yolo"
-                    ? getCurrentTheme().error
-                    : undefined
-              }
-            >
-              {statusMessage}
-            </Text>
-          )}
-          <Text dimColor>(shift+tab to cycle)</Text>
-        </Box>
-        <Box flexGrow={1} justifyContent="flex-end" marginLeft={2}>
-          <Box flexDirection="row" gap={2}>
-            <Text dimColor>{rightMessage}</Text>
-            {tokenDisplay && (
-              <Text color={getTokenColor(tokenUsage!.total_tokens)}>
-                {tokenDisplay}
-              </Text>
-            )}
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Detailed help section */}
-      {showDetailedHelp && (
-        <Box width="100%" flexDirection="column" marginTop={1}>
+      {/* Help mode - full screen help */}
+      {helpMode ? (
+        <Box width="100%" flexDirection="column">
           {detailedHelpItems.map((row, rowIndex) => (
             <Box
               key={rowIndex}
@@ -112,6 +130,38 @@ export function HelpBar({
             </Box>
           ))}
         </Box>
+      ) : (
+        <>
+          {/* Main help bar */}
+          <Box width="100%" flexDirection="row" justifyContent="space-between">
+            <Box flexShrink={0} marginRight={2}>
+              {statusMessage && (
+                <Text
+                  color={
+                    approvalMode === "autoEdit"
+                      ? getCurrentTheme().warning
+                      : approvalMode === "yolo"
+                        ? getCurrentTheme().error
+                        : undefined
+                  }
+                >
+                  {statusMessage}
+                </Text>
+              )}
+              <Text dimColor>? for shortcuts</Text>
+            </Box>
+            <Box flexGrow={1} justifyContent="flex-end" marginLeft={2}>
+              <Box flexDirection="row" alignItems="center" gap={2}>
+                {rightContent}
+                {tokenDisplay && (
+                  <Text dimColor color={getTokenColor(tokenUsage!.total_tokens)}>
+                    {tokenDisplay}
+                  </Text>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        </>
       )}
     </Box>
   );
