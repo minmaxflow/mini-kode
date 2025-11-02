@@ -91,32 +91,32 @@ export type AppActions = ReturnType<typeof useAppState>["actions"];
  */
 type Action =
   | {
-    type: "START_REQUEST";
-    userMessage: string;
-  }
+      type: "START_REQUEST";
+      userMessage: string;
+    }
   | { type: "SET_GENERATING"; isLLMGenerating: boolean }
   | { type: "UPDATE_STREAMING_MESSAGE"; content: string }
   | { type: "COMPLETE_LLM_MESSAGE"; message: LLMMessage }
   | { type: "SET_ERROR"; error?: string }
   | { type: "ADD_TOOL_CALL"; toolCall: ToolCallRunning }
   | {
-    type: "UPDATE_TOOL_CALL";
-    toolCall: ToolCallNonTerminal;
-  }
+      type: "UPDATE_TOOL_CALL";
+      toolCall: ToolCallNonTerminal;
+    }
   | {
-    type: "COMPLETE_TOOL_CALL";
-    toolCall: ToolCallTerminal;
-  }
+      type: "COMPLETE_TOOL_CALL";
+      toolCall: ToolCallTerminal;
+    }
   | { type: "CYCLE_APPROVAL_MODE" }
   | { type: "EXECUTE_PROMPT"; prompt: string }
   | {
-    type: "ADD_COMMAND_CALL";
-    commandCall: CommandCall;
-  }
+      type: "ADD_COMMAND_CALL";
+      commandCall: CommandCall;
+    }
   | {
-    type: "COMPLETE_COMMAND_CALL";
-    commandCall: CommandCall;
-  }
+      type: "COMPLETE_COMMAND_CALL";
+      commandCall: CommandCall;
+    }
   | { type: "CLEAR_SESSION" }
   | { type: "UPDATE_TOKEN_USAGE"; tokenUsage: TokenUsage }
   | { type: "MCP_SERVER_UPDATE"; payload: MCPServerState };
@@ -489,9 +489,9 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
   const initialData = useDebugData
     ? createDebugAppState(false)
     : {
-      messages: [],
-      toolCalls: [],
-    };
+        messages: [],
+        toolCalls: [],
+      };
 
   /**
    * CRITICAL: Use ref to maintain stable currentApprovalMode reference across state updates

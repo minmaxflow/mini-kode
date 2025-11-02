@@ -79,6 +79,7 @@ When in doubt, use this tool. Being proactive with task management demonstrates 
 
 export const TodoReadTool: Tool<z.infer<typeof TodoReadInput>, TodoResult> = {
   name: "todo_read",
+  displayName: "Read Todos",
   description: TODO_READ_TOOL_PROMPT,
   readonly: true,
   inputSchema: TodoReadInput,
@@ -102,6 +103,7 @@ export const TodoReadTool: Tool<z.infer<typeof TodoReadInput>, TodoResult> = {
 
 export const TodoWriteTool: Tool<z.infer<typeof TodoWriteInput>, TodoResult> = {
   name: "todo_write",
+  displayName: "Update Todos",
   description: TODO_WRITE_TOOL_PROMPT,
   // Note: readonly=true means it doesn't modify user files directly. It only writes to .mini-kode/sessions/ which are internal session files, not user project files.
   readonly: true,

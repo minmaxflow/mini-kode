@@ -29,6 +29,7 @@ export const GLOB_TOOL_PROMPT: string = `
 
 export const GlobTool: Tool<GlobInput, GlobResult> = {
   name: "glob",
+  displayName: "Search",
   description: GLOB_TOOL_PROMPT,
   readonly: true,
   inputSchema: InputSchema,

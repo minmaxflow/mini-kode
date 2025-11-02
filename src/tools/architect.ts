@@ -38,6 +38,7 @@ IMPORTANT: Do not attempt to write the code or use any string modification tools
 
 export const ArchitectTool: Tool<ArchitectInput, ArchitectResult> = {
   name: "architect",
+  displayName: "Plan",
   description: ARCHITECT_TOOL_PROMPT,
   readonly: true,
   inputSchema: InputSchema,

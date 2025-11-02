@@ -37,6 +37,7 @@ Any lines longer than 2000 characters will be truncated.
 
 export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
   name: "fileRead",
+  displayName: "Read",
   description: FILEREAD_TOOL_PROMPT,
   readonly: true,
   inputSchema: InputSchema,

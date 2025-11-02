@@ -19,6 +19,7 @@ Return entries with name and kind, and a total count.
 
 export const ListFilesTool: Tool<ListFilesInput, ListFilesResult> = {
   name: "listFiles",
+  displayName: "List",
   description: LISTFILES_TOOL_PROMPT,
   readonly: true,
   inputSchema: InputSchema,

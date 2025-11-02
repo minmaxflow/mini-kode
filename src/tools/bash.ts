@@ -111,6 +111,7 @@ Important notes:
 
 export const BashTool: Tool<BashInput, BashResult> = {
   name: "bash",
+  displayName: "Bash",
   description: BASH_TOOL_PROMPT,
   readonly: false,
   inputSchema: InputSchema,

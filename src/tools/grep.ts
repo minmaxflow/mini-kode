@@ -34,6 +34,7 @@ export const GREP_TOOL_PROMPT: string = `
 
 export const GrepTool: Tool<GrepInput, GrepResult> = {
   name: "grep",
+  displayName: "Search",
   description: GREP_TOOL_PROMPT,
   readonly: true,
   inputSchema: InputSchema,

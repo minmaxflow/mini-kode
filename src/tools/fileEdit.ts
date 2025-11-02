@@ -82,6 +82,7 @@ Remember: when making multiple file edits in a row to the same file, you should 
 
 export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
   name: "fileEdit",
+  displayName: "Edit",
   description: FILEEDIT_TOOL_PROMPT,
   readonly: false,
   inputSchema: InputSchema,
