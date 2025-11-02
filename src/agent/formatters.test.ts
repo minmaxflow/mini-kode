@@ -13,7 +13,6 @@ describe("formatToolResultMessage", () => {
       endedAt: "2025-01-01T00:00:01Z",
       input: { filePath: "/tmp/test.txt" },
       result: {
-        type: "fileRead",
         filePath: "/tmp/test.txt",
         content: "Hello, world!",
         offset: 0,
@@ -29,12 +28,10 @@ describe("formatToolResultMessage", () => {
 
     if (message.role === "tool") {
       expect(message.tool_call_id).toBe("req_1");
-      expect(message.content).toContain("fileRead");
-
       // Content should be JSON string
       if (typeof message.content === "string") {
         const parsed = JSON.parse(message.content);
-        expect(parsed.type).toBe("fileRead");
+        expect(parsed.filePath).toBe("/tmp/test.txt");
         expect(parsed.content).toBe("Hello, world!");
       }
     }
@@ -112,7 +109,6 @@ describe("formatToolResultMessage", () => {
       startedAt: "2025-01-01T00:00:00Z",
       input: { filePath: "test.txt" },
       result: {
-        type: "fileRead",
         filePath: "test.txt",
         content: "test",
         offset: 0,

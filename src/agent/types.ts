@@ -6,7 +6,7 @@
  */
 
 import type { ApprovalMode } from "../config";
-import type { PermissionUiHint } from "../tools/types";
+import type { PermissionUiHint, ApprovalDecision } from "../permissions/types";
 import type { TokenUsage } from "../llm/client";
 import type { CommandCall } from "../ui/commands/command.types";
 import type {
@@ -20,7 +20,6 @@ import type {
   ToolCallNonTerminal,
   ToolCallTerminal,
 } from "../tools/runner.types";
-import type { ApprovalDecision } from "../tools/permissionRequest";
 import type { LLMMessage, Session } from "../sessions/types";
 
 /**
