@@ -36,7 +36,9 @@ function readPackageVersion(): string {
     const raw = fs.readFileSync(pkgPath, "utf8");
     const pkg = JSON.parse(raw);
     if (pkg && typeof pkg.version === "string") return pkg.version as string;
-  } catch {}
+  } catch {
+    // Ignore errors when reading package.json, fallback to default version
+  }
   return "0.0.0";
 }
 

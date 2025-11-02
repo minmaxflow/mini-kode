@@ -22,6 +22,8 @@ import type { MCPServerConfig, TransportType } from "./types";
 
 export type { MCPTool };
 
+export { resolveEnvVars, resolveArgs, resolveHeaders };
+
 /**
  * MCP server connection status
  */
@@ -40,7 +42,11 @@ export interface MCPServerState {
  */
 function resolveEnvVars(value: string): string {
   return value.replace(/\$\{([^}]+)\}/g, (match, envVar) => {
-    return process.env[envVar] || match;
+    // Only allow alphanumeric and underscore in environment variable names
+    if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(envVar)) {
+      return process.env[envVar] || match;
+    }
+    return match;
   });
 }
 
