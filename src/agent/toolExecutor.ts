@@ -8,7 +8,7 @@
  * the core agent loop and the permission-based tool execution.
  */
 
-import { applyPermissionGrant } from "../tools/permissionRequest";
+import { applyPermissionGrant } from "../permissions/permissionRequest";
 import { runToolBatchConcurrent, executeSingleToolCall } from "../tools/runner";
 import { ToolExecutionContext, getToolsByName } from "../tools";
 import type { ParsedToolCall } from "../llm/client";

@@ -16,17 +16,17 @@ export function createTempProject(options?: {
   if (options?.fsPermissions === true) {
     grants.push({
       type: "fs",
-      pattern: dir,
+      path: dir,
       grantedAt: new Date().toISOString(),
     });
   }
 
   // Add bash permissions if specified
   if (options?.bashAllowPrefixes) {
-    for (const pattern of options.bashAllowPrefixes) {
+    for (const command of options.bashAllowPrefixes) {
       grants.push({
         type: "bash",
-        pattern,
+        command,
         grantedAt: new Date().toISOString(),
       });
     }

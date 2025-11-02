@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Box, Static } from "ink";
 
-import type { PermissionOption } from "../../tools/permissionRequest";
+import type { PermissionOption } from "../../permissions/types";
 import { isTransientToolState } from "../../tools/runner.types";
 import type { ToolCall as ToolCallType } from "../../tools/runner.types";
 import type { UIFeedMessage } from "../types";

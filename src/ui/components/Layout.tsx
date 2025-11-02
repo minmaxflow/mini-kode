@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Box, Text } from "ink";
 
-import type { PermissionOption } from "../../tools/permissionRequest";
+import type { PermissionOption } from "../../permissions/types";
 import type { AppState, AppActions } from "../hooks/useAppState";
 import { HelpBar } from "./HelpBar";
 import { Logo } from "./Logo";
@@ -85,8 +85,7 @@ export function Layout({
       {state.mcp.length > 0 && (
         <Box marginTop={1} flexDirection="column">
           <Text>
-            MCP:{" "}
-            {state.mcp.filter((s) => s.status === "connected").length}/
+            MCP: {state.mcp.filter((s) => s.status === "connected").length}/
             {state.mcp.length} connected
           </Text>
           {state.mcp.map((server) => (

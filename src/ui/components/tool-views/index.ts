@@ -9,12 +9,6 @@ import path from "path";
 import React from "react";
 
 import { getToolsByName } from "../../../tools";
-import type { BashInput } from "../../../tools/bash";
-import type { FileEditInput } from "../../../tools/fileEdit";
-import type { FileReadInput } from "../../../tools/fileRead";
-import type { GlobInput } from "../../../tools/glob";
-import type { GrepInput } from "../../../tools/grep";
-import type { ListFilesInput } from "../../../tools/listFiles";
 import type {
   ArchitectSuccess,
   BashSuccess,
@@ -25,7 +19,7 @@ import type {
   ListFilesSuccess,
   TodoSuccess,
 } from "../../../tools/types";
-import type { ToolCall, ToolName } from "../../../tools/runner.types";
+import type { ToolCall } from "../../../tools/runner.types";
 import { ArchitectResultView } from "./ArchitectResultView";
 import { BashResultView } from "./BashResultView";
 import { FileEditResultView } from "./FileEditResultView";
@@ -34,6 +28,7 @@ import { GlobResultView } from "./GlobResultView";
 import { GrepResultView } from "./GrepResultView";
 import { ListFilesResultView } from "./ListFilesResultView";
 import { TodoResultView } from "./TodoResultView";
+import { MCPResultView } from "./MCPResultView";
 
 /**
  * Generate a descriptive title for a tool call based on its input.
@@ -51,81 +46,40 @@ export function getToolCallTitle(
 } {
   const { toolName, input } = toolCall;
 
-  switch (toolName) {
-    case "bash":
-      return {
-        toolName: "Bash",
-        toolInput: (input as BashInput).command || "",
-      };
-    case "fileRead": {
-      // Use relative path if filePath is absolute
-      const filePath = (input as FileReadInput).filePath || "";
-      const displayPath = path.isAbsolute(filePath)
-        ? path.relative(cwd, filePath)
-        : filePath;
-      return {
-        toolName: "Read",
-        toolInput: displayPath,
-      };
-    }
-    case "fileEdit": {
-      // Use relative path if filePath is absolute
-      const filePath = (input as FileEditInput).filePath || "";
-      const displayPath = path.isAbsolute(filePath)
-        ? path.relative(cwd, filePath)
-        : filePath;
-      return {
-        toolName:
-          (input as FileEditInput).old_string === "" ? "Create" : "Update",
-        toolInput: displayPath,
-      };
-    }
-    case "listFiles": {
-      // Use relative path if path is absolute
-      const dirPath = (input as ListFilesInput).path || ".";
-      const displayPath = path.isAbsolute(dirPath)
-        ? path.relative(cwd, dirPath)
-        : dirPath;
-      return {
-        toolName: "List",
-        toolInput: displayPath,
-      };
-    }
-    case "grep": {
-      const grepInput = input as GrepInput;
-      const params = [`pattern: "${grepInput.pattern || ""}"`];
-      if (grepInput.glob) params.push(`glob: "${grepInput.glob}"`);
-      if (grepInput.path) params.push(`path: "${grepInput.path}"`);
-      return {
-        toolName: "Search",
-        toolInput: params.join(", "),
-      };
-    }
-    case "glob": {
-      const globInput = input as GlobInput;
-      const params = [`pattern: "${globInput.pattern || ""}"`];
-      if (globInput.path) params.push(`path: "${globInput.path}"`);
-      return {
-        toolName: "Search",
-        toolInput: params.join(", "),
-      };
-    }
-    case "architect":
-      return {
-        toolName: "Plan",
-        toolInput: "",
-      };
-    case "todo_read":
-      return {
-        toolName: "Read Todos",
-        toolInput: "",
-      };
-    case "todo_write":
-      return {
-        toolName: "Update Todos",
-        toolInput: "",
-      };
+  // Get display name from tool definition
+  const toolsByName = getToolsByName();
+  const tool = toolsByName[toolName];
+  const displayToolName = tool?.displayName || toolName;
+
+  // Special handling for file paths to show relative paths
+  let toolInput = "";
+
+  if (input) {
+    const params = Object.entries(input)
+      .filter(
+        ([, value]) => value !== undefined && value !== null && value !== "",
+      )
+      .map(([key, value]) => {
+        // Show relative paths for file paths
+        if (
+          (key === "filePath" || key === "path") &&
+          typeof value === "string"
+        ) {
+          const displayPath = path.isAbsolute(value)
+            ? path.relative(cwd, value)
+            : value;
+          return `${key}: "${displayPath}"`;
+        }
+        return `${key}: ${JSON.stringify(value)}`;
+      });
+
+    toolInput = params.length > 0 ? `${params.join(", ")}` : "";
   }
+
+  return {
+    toolName: displayToolName,
+    toolInput,
+  };
 }
 
 /**
@@ -135,7 +89,7 @@ export function getToolCallTitle(
  * @returns Render function for the tool's result, or undefined if no custom view
  */
 export function getToolResultView(
-  toolName: ToolName,
+  toolName: string,
   cwd: string,
 ): ((toolCall: ToolCall, cwd: string) => React.ReactNode) | undefined {
   switch (toolName) {
@@ -182,7 +136,10 @@ export function getToolResultView(
           result: toolCall.result as TodoSuccess,
         });
     default:
-      return undefined;
+      return (toolCall) =>
+        React.createElement(MCPResultView, {
+          toolCall,
+        });
   }
 }
 
@@ -192,7 +149,7 @@ export function getToolResultView(
  * @param toolName Name of the tool
  * @returns true if the tool is readonly, false otherwise
  */
-export function isToolReadonly(toolName: ToolName): boolean {
+export function isToolReadonly(toolName: string): boolean {
   const toolsByName = getToolsByName();
   const tool = toolsByName[toolName];
   return tool ? tool.readonly : false;

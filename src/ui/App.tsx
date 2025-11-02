@@ -1,18 +1,17 @@
 import { useEffect, useCallback } from "react";
-import {useEffectEvent} from 'use-effect-event'
+import { useEffectEvent } from "use-effect-event";
 import { useApp, useInput } from "ink";
 
 import { executeAgent } from "../agent/executor";
 import type { ExecutionCallbacks } from "../agent/types";
 import type { LLMMessage } from "../sessions/types";
 import type { ApprovalMode } from "../config";
-import type { PermissionUiHint } from "../tools/types";
+import type { PermissionUiHint, PermissionOption } from "../permissions/types";
 import { isTransientToolState } from "../tools/runner.types";
 import {
   requestUserApproval,
   resolveApproval,
-  type PermissionOption,
-} from "../tools/permissionRequest";
+} from "../permissions/permissionRequest";
 import { Layout } from "./components/Layout";
 import { useAppState } from "./hooks/useAppState";
 import { createClient } from "../llm/client";
@@ -47,10 +46,10 @@ export function App({ cwd, approvalMode }: AppProps) {
   // Use useEffectEvent to prevent infinite re-renders
   const updateMCPServer = useEffectEvent(actions.updateMCPServer);
   const setError = useEffectEvent(actions.setError);
-  
+
   // Initialize MCP connections on app start
   useEffect(() => {
-    mcpService.initializeWithProgress(cwd, updateMCPServer).catch(error => {
+    mcpService.initializeWithProgress(cwd, updateMCPServer).catch((error) => {
       setError(error instanceof Error ? error.message : String(error));
     });
   }, [cwd, updateMCPServer, setError]);
@@ -75,7 +74,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     state.isLLMGenerating ||
     state.toolCalls.some((toolCall) => isTransientToolState(toolCall.status)) ||
     state.messages.some(
-      (msg) => msg.kind === "cmd" && msg.status === "executing"
+      (msg) => msg.kind === "cmd" && msg.status === "executing",
     );
 
   // Handle ESC key to abort execution (LLM generation or tool execution)
@@ -85,7 +84,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     if (key.escape) {
       // Check if there are any active permission prompts
       const hasPermissionPrompt = state.toolCalls.some(
-        (call) => call.status === "permission_required"
+        (call) => call.status === "permission_required",
       );
 
       // Only handle abort if there's no permission prompt active
@@ -154,7 +153,7 @@ export function App({ cwd, approvalMode }: AppProps) {
       // When a tool needs user approval, this callback gets called.
       onPermissionRequired: async (
         hint: PermissionUiHint,
-        requestId: string
+        requestId: string,
       ) => {
         // How it works:
         // - requestUserApproval() registers a resolver in refs.pendingApprovals.current
@@ -168,7 +167,7 @@ export function App({ cwd, approvalMode }: AppProps) {
         // by the executor before calling this callback, so the UI is ready
         const decision = await requestUserApproval(
           requestId,
-          refs.pendingApprovals.current
+          refs.pendingApprovals.current,
         );
 
         return decision;
@@ -200,7 +199,7 @@ export function App({ cwd, approvalMode }: AppProps) {
         getApprovalMode: getCurrentApprovalMode,
         session: session,
       },
-      callbacks
+      callbacks,
     );
   };
 
@@ -241,7 +240,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     resolveApproval(
       requestId,
       { approved: true, option },
-      refs.pendingApprovals.current
+      refs.pendingApprovals.current,
     );
   };
 
@@ -264,7 +263,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     resolveApproval(
       requestId,
       { approved: false, reason: "user_rejected" },
-      refs.pendingApprovals.current
+      refs.pendingApprovals.current,
     );
   };
 
@@ -282,16 +281,18 @@ export function App({ cwd, approvalMode }: AppProps) {
           cwd,
         }),
         actions,
-        handleSubmit
+        handleSubmit,
       );
 
       // For backward compatibility, only add commands that don't manage their own state
       // Currently all commands manage their own state, so no special handling needed
     },
-    [state.messages, actions, handleSubmit, cwd]
+    [state.messages, actions, handleSubmit, cwd],
   );
 
-  const handleExit = (): void => {
+  const handleExit = async (): Promise<void> => {
+    // Gracefully shutdown MCP connections before exit
+    await mcpService.shutdown();
     exit();
   };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Text } from "ink";
 
-import type { PermissionOption } from "../../tools/permissionRequest";
+import type { PermissionOption } from "../../permissions/types";
 import type { ToolCall } from "../../tools/runner.types";
 import { getCurrentTheme } from "../../ui/theme";
 import ErrorView from "./ErrorView";
@@ -80,7 +80,7 @@ export function ToolCallView({
               uiHint={call.uiHint!}
               cwd={cwd}
               onDecide={(option) => {
-                if (option === "reject") {
+                if (option.kind === "reject") {
                   onReject?.(requestId);
                 } else {
                   onApprove?.(requestId, option);
@@ -112,7 +112,7 @@ export function ToolCallView({
         </Box>
       )}
 
-      {status === "error" && call.result && "isError" in call.result && (
+      {status === "error" && (
         <Box>
           <ErrorView message={call.result.message} />
         </Box>

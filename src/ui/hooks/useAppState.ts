@@ -1,7 +1,7 @@
 import { useCallback, useReducer, useRef } from "react";
 
 import type { ApprovalMode } from "../../config";
-import type { ApprovalPromise } from "../../tools/permissionRequest";
+import type { ApprovalPromise } from "../../permissions/permissionRequest";
 import type { LLMMessage, Session } from "../../sessions/types";
 import { wrapAsLLMMessage } from "../../sessions/types";
 import type { UIFeedMessage } from "../types";

@@ -157,7 +157,6 @@ describe("MessageFeed component", () => {
           input: {},
           startedAt: new Date().toISOString(),
           result: {
-            type: "fileRead" as const,
             filePath: "/test/file.txt",
             content: "Tool result",
             offset: 0,

@@ -68,7 +68,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
 
     switch (status) {
       case "executing":
-        iconColor = getCurrentTheme().warning;
+        iconColor = getCurrentTheme().secondary;
         displayContent = <Text>compacting conversion...</Text>;
         break;
       case "success":

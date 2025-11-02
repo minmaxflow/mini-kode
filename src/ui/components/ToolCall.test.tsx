@@ -11,7 +11,7 @@ function make(
     startedAt: new Date().toISOString(),
     input: {},
     ...base,
-  };
+  } as ToolCall;
 }
 
 describe("ToolCall component", () => {
@@ -69,7 +69,7 @@ describe("ToolCall component", () => {
       requestId: "ok",
       status: "success",
       result: {
-        type: "listFiles",
+
         path: "/test",
         entries: [{ name: "file.txt", kind: "file" }],
         total: 1,

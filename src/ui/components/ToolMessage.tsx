@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box, Text } from "ink";
 
-import type { PermissionOption } from "../../tools/permissionRequest";
+import type { PermissionOption } from "../../permissions/types";
 import type { ToolCall as ToolCallType } from "../../tools/runner.types";
 import { getToolResultView } from "./tool-views";
 import { ToolCallView } from "./ToolCallView";
@@ -56,7 +56,7 @@ export function ToolMessage({
   } else if (toolCall.status === "success") {
     color = getCurrentTheme().success;
   } else if (toolCall.status === "executing") {
-    color = getCurrentTheme().warning;
+    color = getCurrentTheme().secondary;
   }
 
   return (

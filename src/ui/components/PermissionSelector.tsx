@@ -3,8 +3,11 @@ import path from "path";
 import { useState } from "react";
 import { Box, Text, useInput } from "ink";
 
-import type { PermissionOption } from "../../tools/permissionRequest";
-import type { PermissionUiHint } from "../../tools/types";
+import type {
+  PermissionOption,
+  PermissionUiHint,
+} from "../../permissions/types";
+import { extractCommandPrefix } from "../../permissions";
 import { getCurrentTheme } from "../theme";
 
 export interface PermissionSelectorProps {
@@ -35,23 +38,14 @@ export function PermissionSelector({
     // Arrow key navigation
     if (key.upArrow && selectedIndex > 0) {
       setSelectedIndex(selectedIndex - 1);
-      return;
-    }
-    if (key.downArrow && selectedIndex < options.length - 1) {
+    } else if (key.downArrow && selectedIndex < options.length - 1) {
       setSelectedIndex(selectedIndex + 1);
-      return;
-    }
-
-    // Enter key to confirm selection
-    if (key.return) {
+    } else if (key.return) {
+      // Enter key to confirm selection
       onDecide(options[selectedIndex].value);
-      return;
-    }
-
-    // Escape key to reject
-    if (key.escape) {
-      onDecide("reject");
-      return;
+    } else if (key.escape) {
+      // Escape key to reject
+      onDecide({ kind: "reject" });
     }
   });
 
@@ -100,24 +94,23 @@ function getRelativePath(absolutePath: string, cwd: string): string {
 
 function buildOptions(uiHint: PermissionSelectorProps["uiHint"]): OptionItem[] {
   if (uiHint.kind === "bash") {
-    const cmd = uiHint.command;
-    const cmdPrefix = cmd.split(" ")[0];
+    const cmdPrefix = extractCommandPrefix(uiHint.command);
 
     return [
       {
-        value: "once",
+        value: { kind: "once" },
         label: "Yes (only this time)",
       },
       {
-        value: "remember-prefix",
+        value: { kind: "bash", scope: "prefix" },
         label: `Yes, remember for ${cmdPrefix} commands`,
       },
       {
-        value: "remember-all",
+        value: { kind: "bash", scope: "global" },
         label: `Yes, remember for all bash commands`,
       },
       {
-        value: "reject",
+        value: { kind: "reject" },
         label: "No (esc)",
       },
     ];
@@ -126,19 +119,19 @@ function buildOptions(uiHint: PermissionSelectorProps["uiHint"]): OptionItem[] {
   if (uiHint.kind === "mcp") {
     return [
       {
-        value: "once",
+        value: { kind: "once" },
         label: "Yes (only this time)",
       },
       {
-        value: "remember-prefix",
-        label: `Yes, remember for ${uiHint.serverName} tools`,
+        value: { kind: "mcp", scope: "tool" },
+        label: `Yes, remember for ${uiHint.displayName}`,
       },
       {
-        value: "remember-all",
-        label: `Yes, remember for all MCP tools`,
+        value: { kind: "mcp", scope: "server" },
+        label: `Yes, remember for ${uiHint.serverName} server`,
       },
       {
-        value: "reject",
+        value: { kind: "reject" },
         label: "No (esc)",
       },
     ];
@@ -150,19 +143,19 @@ function buildOptions(uiHint: PermissionSelectorProps["uiHint"]): OptionItem[] {
 
   return [
     {
-      value: "once",
+      value: { kind: "once" },
       label: "Yes (only this time)",
     },
     {
-      value: "remember-prefix",
-      label: `Yes, remember for ${path.basename(dirPath)}`,
+      value: { kind: "fs", scope: "directory" },
+      label: `Yes, remember for ${path.basename(dirPath)}/`,
     },
     {
-      value: "remember-all",
+      value: { kind: "fs", scope: "global" },
       label: `Yes, remember for all files`,
     },
     {
-      value: "reject",
+      value: { kind: "reject" },
       label: "No (esc)",
     },
   ];
@@ -203,12 +196,11 @@ function renderUiHintDetails(uiHint: PermissionUiHint, cwd: string) {
   }
 
   if (uiHint.kind === "mcp") {
-    const toolDisplay = `${uiHint.serverName}.${uiHint.toolName}`
     return (
       <Box flexDirection="column">
         <Text>MCP Tool access needed for:</Text>
         <Box marginTop={1} marginLeft={2}>
-          <Text color={getCurrentTheme().warning}>{toolDisplay}</Text>
+          <Text color={getCurrentTheme().warning}>{uiHint.displayName}</Text>
         </Box>
         {uiHint.message && (
           <Box marginLeft={2}>
