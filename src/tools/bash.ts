@@ -4,8 +4,7 @@ import { z } from "zod";
 import { Tool, BashResult } from "./types";
 import { PermissionRequiredError } from "./types";
 import { checkBashApproval, validateBashCommand } from "../permissions";
-
-const maxCharacters = 30000;
+import { limitText } from "./limitUtils";
 
 const InputSchema = z.object({
   command: z
@@ -57,7 +56,7 @@ Before executing the command, please follow these steps:
    - Capture the output of the command.
 
 4. Output Processing:
-   - If the output exceeds ${maxCharacters} characters, output will be truncated before being returned to you.
+   - If the output exceeds 2000 lines, output will be truncated before being returned to you.
    - Prepare the output for display to the user.
 
 5. Return Result:
@@ -234,30 +233,25 @@ async function runCommand(
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
-      if (stdout.length + chunk.length > maxCharacters) {
-        const remaining = Math.max(0, maxCharacters - stdout.length);
-        stdout += chunk.slice(0, remaining);
-        truncated = true;
-      } else {
-        stdout += chunk;
-      }
+      stdout += chunk;
     });
     child.stderr.on("data", (chunk: string) => {
-      if (stderr.length + chunk.length > maxCharacters) {
-        const remaining = Math.max(0, maxCharacters - stderr.length);
-        stderr += chunk.slice(0, remaining);
-        truncated = true;
-      } else {
-        stderr += chunk;
-      }
+      stderr += chunk;
     });
     child.on("close", (code) => {
+      // Apply line limits using shared utility
+      const { content: limitedStdout, truncated: stdoutTruncated } =
+        limitText(stdout);
+
+      const { content: limitedStderr, truncated: stderrTruncated } =
+        limitText(stderr);
+
       resolveOnce({
         command,
-        stdout,
-        stderr,
+        stdout: limitedStdout,
+        stderr: limitedStderr,
         exitCode: code ?? 0,
-        truncated,
+        truncated: stdoutTruncated || stderrTruncated,
         durationMs: Date.now() - start,
       });
     });
