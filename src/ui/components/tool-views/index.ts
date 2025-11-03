@@ -55,50 +55,49 @@ export function getToolCallTitle(
   let toolInput = "";
 
   if (input) {
-    const params = Object.entries(input)
-      .filter(
-        ([, value]) => value !== undefined && value !== null && value !== "",
-      )
-      .filter(([key]) => {
-        // Exclude old_string and new_string for fileEdit tool
-        if (
-          toolName === "fileEdit" &&
-          (key === "old_string" || key === "new_string")
-        ) {
-          return false;
-        }
-        return true;
-      })
-      .map(([key, value], _index, array) => {
-        // Show relative paths for file paths
-        if (
-          (key === "filePath" || key === "path") &&
-          typeof value === "string"
-        ) {
-          const displayPath = path.isAbsolute(value)
-            ? path.relative(cwd, value)
-            : value;
-          if (array.length === 1) {
-            // If it's the only parameter, return just the path
-            return displayPath;
-          }
-          return `${key}: "${displayPath}"`;
-        }
-        return `${key}: ${JSON.stringify(value)}`;
-      });
+    const entries = Object.entries(input).filter(
+      ([, value]) => value !== undefined && value !== null && value !== "",
+    );
 
-    // If there's only one parameter, return just the value without the key
-    if (params.length === 1) {
-      const singleParam = params[0];
-      // Extract just the value part (after the colon and space)
-      const colonIndex = singleParam.indexOf(": ");
-      if (colonIndex > 0) {
-        toolInput = singleParam.slice(colonIndex + 2);
-      } else {
-        toolInput = singleParam;
+    // Filter out excluded keys
+    const filteredEntries = entries.filter(([key]) => {
+      if (
+        toolName === "fileEdit" &&
+        (key === "old_string" || key === "new_string")
+      ) {
+        return false;
       }
+      return true;
+    });
+
+    // Format each parameter
+    const params = filteredEntries.map(([key, value], _, array) => {
+      // Handle file paths
+      if (
+        (key === "filePath" || key === "path") &&
+        typeof value === "string"
+      ) {
+        const displayPath = path.isAbsolute(value)
+          ? path.relative(cwd, value)
+          : value;
+        return { key, value: displayPath};
+      }
+
+      return { key,  value: String };
+    });
+
+    // Format output based on parameter count
+    if (params.length === 0) {
+      toolInput = "";
+    } else if (params.length === 1) {
+      const param = params[0];
+      toolInput = String(param.value);
     } else {
-      toolInput = params.length > 0 ? `${params.join(", ")}` : "";
+      toolInput = params
+        .map((param) => {
+          return `${param.key}: ${param.value}`;
+        })
+        .join(", ");
     }
   }
 
