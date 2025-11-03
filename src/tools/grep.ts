@@ -5,6 +5,34 @@ import { globSync } from "glob";
 import { Tool, GrepResult, GrepMatch } from "./types";
 import { isTextFile } from "../utils/file-type";
 
+/**
+ * Search for regex patterns in file content line by line
+ * @param content - File content to search through
+ * @param regex - Regular expression pattern to match
+ * @param filePath - Path to the file (for result context)
+ * @param maxMatches - Maximum number of matches to return
+ * @returns Array of line matches with line numbers
+ */
+export function searchFileContent(
+  content: string,
+  regex: RegExp,
+  filePath: string,
+  maxMatches: number = 500,
+): GrepMatch[] {
+  const matches: GrepMatch[] = [];
+  const lines = content.split(/\r?\n/);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (regex.test(line)) {
+      matches.push({ filePath, line, lineNumber: i + 1 });
+    }
+    if (matches.length >= maxMatches) break;
+  }
+
+  return matches;
+}
+
 const InputSchema = z.object({
   pattern: z
     .string()
@@ -115,16 +143,14 @@ export const GrepTool: Tool<GrepInput, GrepResult> = {
       if (!isTextFile(file)) continue;
 
       try {
-        const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
-        for (let i = 0; i < lines.length; i++) {
-          if (context.signal?.aborted)
-            return { isError: true, isAborted: true, message: "Aborted" };
-          const line = lines[i];
-          if (regex.test(line)) {
-            matches.push({ filePath: file, line, lineNumber: i + 1 });
-          }
-          if (matches.length >= maxMatches) break;
-        }
+        const content = fs.readFileSync(file, "utf8");
+        const fileMatches = searchFileContent(
+          content,
+          regex,
+          file,
+          maxMatches - matches.length,
+        );
+        matches.push(...fileMatches);
       } catch (error) {
         // ignore read errors for binary files etc.
         continue;
