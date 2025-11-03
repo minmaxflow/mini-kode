@@ -66,13 +66,7 @@ export function ErrorView({ message }: ErrorViewProps) {
       suggestions.push("   • Wait a moment before retrying");
       suggestions.push("   • Check your API quota and billing status");
     }
-
-    // If no specific suggestions, provide general help
-    if (suggestions.length === 0) {
-      suggestions.push("💡 Check configuration with: mini-kode config");
-      suggestions.push("   • Verify API key and model settings");
-    }
-
+    
     return suggestions;
   };
 

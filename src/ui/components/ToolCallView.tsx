@@ -48,16 +48,12 @@ export function ToolCallView({
 
   const terminalWidth = useTerminalWidth();
 
-  toolInput = `git commit -m \"refactor: simplify FileReadResultView logic and fix tests\n\n- Remove unnecessary Math.min calculation in
-  FileReadResultView\n- offset and limit are already processed by limitUtils (actualOffset, actualLimit)\n- limit now represents actual number of lines
-  returned, not requested limit\n- Update test data to reflect actual vs requested values\n- Add clarifying comments about field semantics\"`;
-
   return (
     <Box flexDirection="column" width={terminalWidth - 4}>
       {/* First layer: Tool title with bold toolName */}
       <Text>
         <Text bold>{toolName}</Text>
-        <Text>{toolInput ? `(${toolInput.replace(/\n/g, "")})` : ""}</Text>
+        <Text >{toolInput ? `${toolInput ? `(${toolInput})` : ""}` : ""}</Text>
       </Text>
 
       {/* Second layer: Status/Result with ⎿  prefix */}

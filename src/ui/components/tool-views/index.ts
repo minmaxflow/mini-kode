@@ -80,7 +80,19 @@ export function getToolCallTitle(
         return `${key}: ${JSON.stringify(value)}`;
       });
 
-    toolInput = params.length > 0 ? `${params.join(", ")}` : "";
+    // If there's only one parameter, return just the value without the key
+    if (params.length === 1) {
+      const singleParam = params[0];
+      // Extract just the value part (after the colon and space)
+      const colonIndex = singleParam.indexOf(': ');
+      if (colonIndex > 0) {
+        toolInput = singleParam.slice(colonIndex + 2);
+      } else {
+        toolInput = singleParam;
+      }
+    } else {
+      toolInput = params.length > 0 ? `${params.join(", ")}` : "";
+    }
   }
 
   return {
