@@ -22,9 +22,26 @@ export type GlobInput = z.infer<typeof InputSchema>;
 
 export const GLOB_TOOL_PROMPT: string = `
 - Fast file pattern matching using the glob library.
-- Supports standard glob patterns like "**/*.js", "src/**/*.ts", etc.
-- Returns matching file paths sorted by modification time.
-- Use this tool when you need to find files by name patterns.
+- Supports standard glob patterns for finding files by name.
+
+## Pattern Examples:
+- "*.ts" - All TypeScript files in current directory
+- "**/*.js" - All JavaScript files in current directory and subdirectories
+- "src/**/*.ts" - All TypeScript files in src directory and subdirectories
+- "test/**/*.test.ts" - All test files in test directory and subdirectories
+- "*.{js,ts}" - All JavaScript and TypeScript files in current directory
+- "package.json" - Find specific file
+
+## Path Usage:
+- If path is provided, searches within that directory (relative to current working directory)
+- If path is omitted, searches from current working directory
+- Path should be absolute or relative to the current working directory
+
+## Important Notes:
+- Returns matching file paths sorted by modification time (newest first)
+- Always use this tool when you need to find files by name patterns
+- For searching file contents, use the grep tool instead
+- The pattern follows standard glob syntax, not regex
 `.trim();
 
 export const GlobTool: Tool<GlobInput, GlobResult> = {

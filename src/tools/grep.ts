@@ -30,6 +30,34 @@ export const GREP_TOOL_PROMPT: string = `
 - Case insensitive search
 - Returns matching file paths with line numbers, sorted by modification time
 - Use this tool when you need to find files containing specific patterns
+
+## Pattern Examples (Regex):
+- "function\\s+\\w+" - Find function definitions
+- "import.*from" - Find import statements
+- "console\\.(log|error)" - Find console log/error calls
+- "TODO|FIXME" - Find TODO or FIXME comments
+- "class\\s+\\w+" - Find class definitions
+
+## Glob Parameter Examples:
+- "*.ts" - Search only in TypeScript files in current directory
+- "**/*.js" - Search in JavaScript files in current directory and subdirectories
+- "src/**/*.ts" - Search in TypeScript files within src directory and subdirectories
+- "test/**/*.test.ts" - Search only in test files
+- "*.{js,ts}" - Search in JavaScript and TypeScript files in current directory
+- "package.json" - Search only in specific file
+
+## Path and Glob Usage:
+- path: Directory to search in (defaults to current working directory)
+- glob: File pattern to filter which files to search within
+- When both path and glob are used: searches within the specified path for files matching the glob pattern
+- When only glob is provided: searches from current working directory for files matching the pattern
+- When neither is provided: searches all files in current working directory
+
+## Important Notes:
+- Search is case insensitive by default
+- Avoid overly broad patterns like ".*" which may match too many files
+- Use specific glob patterns to limit search scope for better performance
+- For finding files by name, use the glob tool instead
 `.trim();
 
 export const GrepTool: Tool<GrepInput, GrepResult> = {
@@ -54,33 +82,6 @@ export const GrepTool: Tool<GrepInput, GrepResult> = {
       return { isError: true, message: "Invalid regex pattern" };
     }
 
-    // Load .gitignore patterns
-    let ignorePatterns: string[] = ["**/node_modules/**"]; // Default fallback
-    try {
-      const gitignorePath = path.join(root, ".gitignore");
-      if (fs.existsSync(gitignorePath)) {
-        const gitignoreContent = fs.readFileSync(gitignorePath, "utf8");
-        ignorePatterns = gitignoreContent
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(
-            (line) => line && !line.startsWith("#") && !line.startsWith("!"),
-          )
-          .map((line) => {
-            // Convert gitignore patterns to glob patterns
-            if (line.startsWith("/")) {
-              return line.slice(1) + "/**";
-            }
-            if (line.endsWith("/")) {
-              return line + "**";
-            }
-            return line;
-          });
-      }
-    } catch (error) {
-      // Use default ignore patterns if .gitignore can't be read
-    }
-
     const matches: GrepMatch[] = [];
     let files: string[];
     try {
@@ -88,7 +89,6 @@ export const GrepTool: Tool<GrepInput, GrepResult> = {
         cwd: root,
         absolute: true,
         nodir: true,
-        ignore: ignorePatterns,
       });
     } catch (error) {
       return {
