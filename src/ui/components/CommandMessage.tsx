@@ -5,6 +5,8 @@ import { getCurrentTheme } from "../theme";
 import { CommandCall } from "../commands";
 import { InkMarkdown } from "./InkMarkdown";
 import { useTerminalWidth } from "../hooks/useTerminalWidth";
+import { MCPDetailView } from "./MCPDetailView";
+import { CompactResult, MCPResult } from "../commands/command.types";
 
 export interface CommandMessageProps {
   commandMessage: CommandCall;
@@ -66,6 +68,8 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
     let iconColor: string | undefined = undefined;
     let displayContent: React.ReactNode = "";
 
+    const compactResult = result as CompactResult;
+
     switch (status) {
       case "executing":
         iconColor = getCurrentTheme().secondary;
@@ -74,11 +78,9 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       case "success":
         iconColor = getCurrentTheme().success;
         // Use markdown component for success result
-        displayContent = result ? (
-          <InkMarkdown>{result}</InkMarkdown>
-        ) : (
-          <Text>Completed</Text>
-        );
+        displayContent = compactResult && (
+          <InkMarkdown>{compactResult}</InkMarkdown>
+        )
         break;
       case "error":
         iconColor = getCurrentTheme().error;
@@ -107,6 +109,41 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
         </Box>
         <Box flexDirection="column">
           {commandDisplay}
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /mcp command: show MCP server details
+  if (commandName === "/mcp") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    const mcpResult = result as MCPResult;
+
+    switch (status) {
+      case "success":
+        iconColor = getCurrentTheme().success;
+        // Use MCPDetailView for success result
+        displayContent = <MCPDetailView serverStates={mcpResult} />;
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>{commandName}</Text>
           <Box flexDirection="row">
             <Box>
               <Text>⎿{"  "}</Text>
