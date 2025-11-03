@@ -19,6 +19,7 @@ beforeEach(() => {
   delete process.env.MINIKODE_PLAN_MODEL;
   delete process.env.DEEPSEEK_API_KEY;
   delete process.env.OPENAI_API_KEY;
+  delete process.env.GLM_API_KEY;
 
   // Backup and override config path
   process.env.MINI_KODE_TEST_CONFIG_DIR = testConfigDir;
@@ -68,9 +69,9 @@ describe("ConfigManager", () => {
       expect(config.llm.planModel).toBe("deepseek-chat");
       expect(config.llm.apiKey).toBe("deepseek-key");
 
-      expect(config.llm.baseURLSource).toBe("default");
-      expect(config.llm.modelSource).toBe("default");
-      expect(config.llm.planModelSource).toBe("default");
+      expect(config.llm.baseURLSource).toBe("env");
+      expect(config.llm.modelSource).toBe("env");
+      expect(config.llm.planModelSource).toBe("env");
       expect(config.llm.apiKeySource).toBe("env");
     });
   });
