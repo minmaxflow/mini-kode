@@ -59,6 +59,13 @@ export function getToolCallTitle(
       .filter(
         ([, value]) => value !== undefined && value !== null && value !== "",
       )
+      .filter(([key]) => {
+        // Exclude old_string and new_string for fileEdit tool
+        if (toolName === "fileEdit" && (key === "old_string" || key === "new_string")) {
+          return false;
+        }
+        return true;
+      })
       .map(([key, value]) => {
         // Show relative paths for file paths
         if (
