@@ -72,7 +72,7 @@ export function ToolCallView({
       {status === "permission_required" && (
         <Box flexDirection="column">
           <Box>
-            <Text>⎿{"  "}Running...</Text>
+            <Text color={getCurrentTheme().warning}>⎿{"  "}Waiting for permission...</Text>
           </Box>
           <Box marginLeft={1}>
             <PermissionSelector
