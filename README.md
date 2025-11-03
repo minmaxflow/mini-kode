@@ -95,6 +95,15 @@ Mini-Kode automatically uses `AGENTS.md` file in your project root to provide co
 - **Customizable**: Edit `AGENTS.md` to include project-specific information
 - **Persistent Memory**: Maintains project context across sessions
 
+## 📊 Project Scale
+
+- **~130 files** in the source code
+- **~19K lines** including tests and comments
+- **~15K lines** of production code (excluding tests)
+- **~11K lines** of actual implementation logic
+
+This project provides a comprehensive yet manageable codebase for understanding modern AI assistant architecture.
+
 ## 🏗️ Project Structure
 
 ```
