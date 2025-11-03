@@ -135,8 +135,10 @@ export type FileReadResult =
       content: string;
       offset: number;
       limit: number;
-      totalLines: number;
-      truncated: boolean;
+      fileTotalLines: number;
+      // Note: 'truncated' field intentionally omitted for FileReadResult
+      // When LLM specifies offset/limit, truncation is expected behavior
+      // LLM can use fileTotalLines to determine if more content is needed
     }
   | (ToolErrorResult & { filePath: string });
 
@@ -158,6 +160,7 @@ export type GrepResult =
       pattern: string;
       include?: string;
       path?: string;
+      glob?: string;
     }
   | ToolErrorResult;
 
@@ -173,19 +176,12 @@ export type FileEditSuccessType = {
   filePath: string;
   mode: "create" | "update";
   success: true;
-  message: string;
   oldContent?: string;
   newContent: string;
   editStartLine: number;
 };
 
-export type FileEditFailure = ToolErrorResult & {
-  reason?:
-    | "non_unique"
-    | "not_found"
-    | "permission"
-    | "read_before_write_missing";
-};
+export type FileEditFailure = ToolErrorResult;
 
 export type FileEditResult = FileEditSuccessType | FileEditFailure;
 

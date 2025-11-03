@@ -132,11 +132,12 @@ export const GrepTool: Tool<GrepInput, GrepResult> = {
       if (matches.length >= maxMatches) break;
     }
 
-    return {
+    const result: GrepResult = {
       matches,
       pattern: input.pattern,
       glob: input.glob,
       path: root,
     };
+    return result;
   },
 };
