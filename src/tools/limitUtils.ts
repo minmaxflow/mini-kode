@@ -22,7 +22,9 @@ export function limitText(
 ): {
   content: string;
   truncated: boolean;
-  totalLines: number;
+  fileTotalLines: number;
+  actualOffset: number;
+  actualLimit: number;
 } {
   const {
     offset = 0,
@@ -32,14 +34,14 @@ export function limitText(
   } = config;
 
   const lines = text.split(/\r\n|\r|\n/);
-  const totalLines = lines.length;
+  const fileTotalLines = lines.length;
 
-  // Apply offset if specified
-  const startIndex = Math.min(offset, totalLines);
-  const linesWithOffset = startIndex > 0 ? lines.slice(startIndex) : lines;
+  const actualOffset = Math.min(offset, fileTotalLines);
+  const linesAfterOffset = lines.slice(actualOffset);
 
   // Limit number of lines
-  const limitedLines = linesWithOffset.slice(0, maxLines);
+  const limitedLines = linesAfterOffset.slice(0, maxLines);
+  const actualLimit = limitedLines.length;
 
   // Limit line length using limitString
   const processedLines = limitedLines.map(
@@ -47,9 +49,10 @@ export function limitText(
   );
 
   const content = processedLines.join("\n");
-  const truncated = processedLines.length < totalLines - startIndex;
+  // truncated: whether there are more lines beyond maxLines limit
+  const truncated = linesAfterOffset.length > maxLines;
 
-  return { content, truncated, totalLines };
+  return { content, truncated, fileTotalLines, actualOffset, actualLimit };
 }
 
 /**

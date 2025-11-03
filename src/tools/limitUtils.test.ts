@@ -114,34 +114,100 @@ describe("limitUtils", () => {
       expect(result.truncated).toBe(true);
     });
 
-    it("should handle offset", () => {
-      const lines = Array.from({ length: 10 }, (_, i) => `line-${i}`);
-      const text = lines.join("\n");
-      const result = limitText(text, { offset: 5, maxLines: 3 });
-      expect(result.content.split("\n")).toHaveLength(3);
-      expect(result.content).toBe("line-5\nline-6\nline-7");
-      expect(result.truncated).toBe(true);
-    });
+    // Tests for actualOffset and actualLimit
+    describe("actualOffset and actualLimit", () => {
+      it("should return correct actualOffset and actualLimit for normal offset", () => {
+        const lines = Array.from({ length: 10 }, (_, i) => `line-${i}`);
+        const text = lines.join("\n");
+        const result = limitText(text, { offset: 3, maxLines: 5 });
+        
+        expect(result.actualOffset).toBe(3);
+        expect(result.actualLimit).toBe(5);
+        expect(result.fileTotalLines).toBe(10);
+        expect(result.content.split("\n")).toHaveLength(5);
+        expect(result.content).toBe("line-3\nline-4\nline-5\nline-6\nline-7");
+      });
 
-    it("should handle offset beyond text length", () => {
-      const text = "line1\nline2\nline3";
-      const result = limitText(text, { offset: 10 });
-      expect(result.content).toBe("");
-      expect(result.truncated).toBe(false);
-    });
+      it("should handle offset beyond end of file", () => {
+        const text = "line1\nline2\nline3";
+        const result = limitText(text, { offset: 10, maxLines: 5 });
+        
+        expect(result.actualOffset).toBe(3); // Clamped to fileTotalLines
+        expect(result.actualLimit).toBe(0); // No lines after offset
+        expect(result.fileTotalLines).toBe(3);
+        expect(result.content).toBe("");
+        expect(result.truncated).toBe(false);
+      });
 
-    it("should handle offset with no truncation", () => {
-      const text = "line1\nline2\nline3";
-      const result = limitText(text, { offset: 1 });
-      expect(result.content).toBe("line2\nline3");
-      expect(result.truncated).toBe(false);
-    });
+      it("should handle maxLines beyond available lines after offset", () => {
+        const text = "line1\nline2\nline3\nline4\nline5";
+        const result = limitText(text, { offset: 3, maxLines: 10 });
+        
+        expect(result.actualOffset).toBe(3);
+        expect(result.actualLimit).toBe(2); // Only 2 lines available after offset
+        expect(result.fileTotalLines).toBe(5);
+        expect(result.content).toBe("line4\nline5");
+        expect(result.truncated).toBe(false);
+      });
 
-    it("should handle offset of zero", () => {
-      const text = "line1\nline2\nline3";
-      const result = limitText(text, { offset: 0, maxLines: 2 });
-      expect(result.content).toBe("line1\nline2");
-      expect(result.truncated).toBe(true);
+      it("should handle offset at end of file", () => {
+        const text = "line1\nline2\nline3";
+        const result = limitText(text, { offset: 3, maxLines: 5 });
+        
+        expect(result.actualOffset).toBe(3);
+        expect(result.actualLimit).toBe(0);
+        expect(result.fileTotalLines).toBe(3);
+        expect(result.content).toBe("");
+        expect(result.truncated).toBe(false);
+      });
+
+      it("should handle empty text with offset", () => {
+        const text = "";
+        const result = limitText(text, { offset: 5, maxLines: 10 });
+        
+        // Empty string split creates array with one empty element
+        expect(result.actualOffset).toBe(1);
+        expect(result.actualLimit).toBe(0);
+        expect(result.fileTotalLines).toBe(1);
+        expect(result.content).toBe("");
+        expect(result.truncated).toBe(false);
+      });
+
+      it("should handle offset with single line", () => {
+        const text = "single line";
+        const result = limitText(text, { offset: 0, maxLines: 5 });
+        
+        expect(result.actualOffset).toBe(0);
+        expect(result.actualLimit).toBe(1);
+        expect(result.fileTotalLines).toBe(1);
+        expect(result.content).toBe("single line");
+        expect(result.truncated).toBe(false);
+      });
+
+      it("should handle offset with maxLines of zero", () => {
+        const lines = Array.from({ length: 10 }, (_, i) => `line-${i}`);
+        const text = lines.join("\n");
+        const result = limitText(text, { offset: 2, maxLines: 0 });
+        
+        expect(result.actualOffset).toBe(2);
+        expect(result.actualLimit).toBe(0);
+        expect(result.fileTotalLines).toBe(10);
+        expect(result.content).toBe("");
+        expect(result.truncated).toBe(true); // 8 lines remaining after offset, but we want 0, so truncated
+      });
+
+      it("should handle large offset and small maxLines", () => {
+        const lines = Array.from({ length: 100 }, (_, i) => `line-${i}`);
+        const text = lines.join("\n");
+        const result = limitText(text, { offset: 90, maxLines: 5 });
+        
+        expect(result.actualOffset).toBe(90);
+        expect(result.actualLimit).toBe(5);
+        expect(result.fileTotalLines).toBe(100);
+        expect(result.truncated).toBe(true);
+        expect(result.content.split("\n")).toHaveLength(5);
+        expect(result.content).toBe("line-90\nline-91\nline-92\nline-93\nline-94");
+      });
     });
   });
 });
