@@ -42,13 +42,23 @@ export const ListFilesTool: Tool<ListFilesInput, ListFilesResult> = {
       if (context.signal?.aborted)
         return { isError: true, isAborted: true, message: "Aborted" };
 
-      const entries = names.map((name) => {
+      const maxFiles = 100;
+      const limitedNames = names.slice(0, maxFiles);
+
+      const entries = limitedNames.map((name) => {
         const p = path.join(abs, name);
         const s = fs.statSync(p);
         const kind: "file" | "dir" = s.isDirectory() ? "dir" : "file";
         return { name, kind };
       });
-      return { path: abs, entries, total: entries.length };
+
+      const result: ListFilesResult = {
+        path: abs,
+        entries,
+        total: names.length,
+      };
+
+      return result;
     } catch (err) {
       return { isError: true, message: "Failed to list directory" };
     }
