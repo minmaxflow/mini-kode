@@ -9,6 +9,7 @@ import path from "path";
 import React from "react";
 
 import { getToolsByName } from "../../../tools";
+import { isPathUnderPrefix } from "../../../permissions";
 import type {
   ArchitectSuccess,
   BashSuccess,
@@ -77,13 +78,16 @@ export function getToolCallTitle(
         (key === "filePath" || key === "path") &&
         typeof value === "string"
       ) {
-        const displayPath = path.isAbsolute(value)
-          ? path.relative(cwd, value)
-          : value;
-        return { key, value: displayPath};
+        if (path.isAbsolute(value)) {
+          const absPath = path.resolve(value);
+          if (isPathUnderPrefix(absPath, cwd)) {
+            return { key, value: path.relative(cwd, absPath) };
+          }
+        }
+        return { key, value };
       }
 
-      return { key,  value: String(value) };
+      return { key, value: String(value) };
     });
 
     // Format output based on parameter count
