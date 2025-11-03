@@ -25,10 +25,16 @@ npm install -g mini-kode
 
 ### Set Up API Key
 
-**Recommended: DeepSeek** (tested and verified):
+**DeepSeek** (tested and verified):
 
 ```bash
 export DEEPSEEK_API_KEY="your-deepseek-api-key"
+```
+
+**Or use GLM (智谱AI)** (tested and verified):
+
+```bash
+export GLM_API_KEY="your-glm-api-key"
 ```
 
 **Or use OpenAI compatible API**:
