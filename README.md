@@ -2,24 +2,18 @@
 
 An educational AI coding assistant project that helps you understand and hack modern AI coding assistant systems.
 
-## 🎯 Project Goals
+## 🌟 Why Mini-Kode?
 
-Mini-Kode is an **educational project** designed to:
+![Demo](./demo.png)
 
-- **🧠 Help understand** the architecture and workflows of modern AI coding assistants
-- **🔧 Learn how to build** a complete AI tool system
-- **⚡ Avoid complex frameworks** - built directly on OpenAI SDK abstractions and types
-- **📖 Code readability first** - prioritize clean, understandable code over complex features
+Mini-Kode is an **educational project** designed to help developers understand modern Coding Agent architecture. We strike the perfect balance between overly complex open-source projects and simplistic demo examples, offering a complete yet manageable implementation (14K lines of production code) with:
 
-## ✨ Core Features
-
-- **🛠️ Clean Tool System** - Unified tool interface design
-- **🔐 Permission Control** - Multi-layer project + session permission management
-- **⚙️ Configuration System** - Supports DeepSeek, OpenAI, and compatible APIs
-- **🎨 Theme Support** - Light and dark theme options
-- **🤖 Agent Loop** - Complete LLM + tool calling workflow
-- **📚 Education Focus** - Clear code structure, detailed comments, easy to learn
-- **🔌 MCP Integration** - Full support for Model Context Protocol servers
+- **📚 Education-First Design** - Clean architecture built on OpenAI SDK with thoughtful type design and comprehensive comments
+- **🛠️ Complete Tool System** - Unified interface with comprehensive tools for file operations, search, and command execution
+- **🔌 MCP Integration** - Connect to external MCP servers for extended functionality
+- **⚙️ Multi-LLM Support** - Compatible with OpenAI APIs, including GLM, DeepSeek, and other mainstream models
+- **🤖 Agent Loop** - Complete LLM workflow with streaming responses and human-in-the-loop permission approval
+- **🎨 Modern UI** - React/Ink-based terminal interface with theme support
 
 ## 🚀 Quick Start (Install & Use)
 
@@ -98,11 +92,10 @@ Mini-Kode automatically uses `AGENTS.md` file in your project root to provide co
 ## 📊 Project Scale
 
 - **~130 files** in the source code
-- **~19K lines** including tests and comments
-- **~15K lines** of production code (excluding tests)
+- **~14K lines** of production code
 - **~11K lines** of actual implementation logic
 
-This project provides a comprehensive yet manageable codebase for understanding modern AI assistant architecture.
+This project provides a comprehensive yet manageable codebase for understanding modern AI assistant architecture - **your first Coding Agent, and your learning companion**.
 
 ## 🏗️ Project Structure
 
