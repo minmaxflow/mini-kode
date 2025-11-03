@@ -48,12 +48,19 @@ export function ToolCallView({
 
   const terminalWidth = useTerminalWidth();
 
+  // Truncate toolInput if it exceeds available width (terminalWidth - 20)
+  const maxWidth = Math.max(10, terminalWidth - 20); // Ensure minimum width
+  let displayToolInput = toolInput;
+  if (toolInput && toolInput.length > maxWidth) {
+    displayToolInput = toolInput.slice(0, maxWidth - 2) + "..";
+  }
+
   return (
     <Box flexDirection="column" width={terminalWidth - 4}>
       {/* First layer: Tool title with bold toolName */}
       <Text>
         <Text bold>{toolName}</Text>
-        <Text>{toolInput ? `${toolInput ? `(${toolInput})` : ""}` : ""}</Text>
+        <Text>{displayToolInput ? `(${displayToolInput})` : ""}</Text>
       </Text>
 
       {/* Second layer: Status/Result with ⎿  prefix */}

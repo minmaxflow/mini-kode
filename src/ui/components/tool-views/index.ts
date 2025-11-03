@@ -69,7 +69,7 @@ export function getToolCallTitle(
         }
         return true;
       })
-      .map(([key, value]) => {
+      .map(([key, value], _index, array) => {
         // Show relative paths for file paths
         if (
           (key === "filePath" || key === "path") &&
@@ -78,11 +78,11 @@ export function getToolCallTitle(
           const displayPath = path.isAbsolute(value)
             ? path.relative(cwd, value)
             : value;
+          if (array.length === 1) {
+            // If it's the only parameter, return just the path
+            return displayPath;
+          }
           return `${key}: "${displayPath}"`;
-        }
-        // For strings, don't use JSON.stringify to avoid extra quotes
-        if (typeof value === "string") {
-          return `${key}: "${value}"`;
         }
         return `${key}: ${JSON.stringify(value)}`;
       });
