@@ -4,9 +4,10 @@ import { Box, Text } from "ink";
 import type { PermissionOption } from "../../permissions/types";
 import type { AppState, AppActions } from "../hooks/useAppState";
 import { Logo } from "./Logo";
+import { LLMInfoDisplay } from "./LLMInfoDisplay";
 import MessageFeed from "./MessageFeed";
 import { PromptInput } from "./PromptInput";
-import { getCurrentTheme } from "../theme";
+import ErrorView from "./ErrorView";
 import { CommandName } from "../commands";
 
 export interface LayoutProps {
@@ -64,7 +65,12 @@ export function Layout({
   );
 
   const logo = useMemo(() => {
-    return <Logo />;
+    return (
+      <Box flexDirection="column">
+        <Logo />
+        <LLMInfoDisplay />
+      </Box>
+    );
   }, []);
 
   return (
@@ -79,8 +85,15 @@ export function Layout({
         clearNum={state.clearNum}
       />
 
+      {/* Error display - shows critical errors like LLM API failures */}
+      {state.error && (
+        <Box marginTop={1}>
+          <ErrorView message={state.error} />
+        </Box>
+      )}
+
       {/* PromptInput and HelpBar rendering logic:
-          - Normal state: Render input and help bar  
+          - Normal state: Render input and help bar
           - Permission request state: Don't render input (handled by PermissionPrompt) */}
       {!hasPermissionRequest && (
         <Box marginTop={1} flexDirection="column">

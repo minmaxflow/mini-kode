@@ -43,6 +43,11 @@ const API_PRESETS = {
     model: "gpt-4",
     planModel: "gpt-4",
   },
+  glm: {
+    baseURL: "https://open.bigmodel.cn/api/coding/paas/v4",
+    model: "glm-4.6",
+    planModel: "glm-4.6",
+  },
 } as const;
 
 /**
@@ -91,13 +96,12 @@ function loadFromEnvironment(): {
   }
 
   // Auto-detection based on provider API keys (lower priority)
-  // Only return the API key, let resolver determine other values from defaults
   const deepseekKey = process.env.DEEPSEEK_API_KEY;
   if (deepseekKey?.trim()) {
     return {
-      baseURL: undefined, // Will use default
-      model: undefined, // Will use default
-      planModel: undefined, // Will use default
+      baseURL: API_PRESETS.deepseek.baseURL,
+      model: API_PRESETS.deepseek.model,
+      planModel: API_PRESETS.deepseek.planModel,
       apiKey: deepseekKey.trim(),
     };
   }
@@ -105,10 +109,20 @@ function loadFromEnvironment(): {
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey?.trim()) {
     return {
-      baseURL: undefined, // Will use default
-      model: undefined, // Will use default
-      planModel: undefined, // Will use default
+      baseURL: API_PRESETS.openai.baseURL,
+      model: API_PRESETS.openai.model,
+      planModel: API_PRESETS.openai.planModel,
       apiKey: openaiKey.trim(),
+    };
+  }
+
+  const glmKey = process.env.GLM_API_KEY;
+  if (glmKey?.trim()) {
+    return {
+      baseURL: API_PRESETS.glm.baseURL,
+      model: API_PRESETS.glm.model,
+      planModel: API_PRESETS.glm.planModel,
+      apiKey: glmKey.trim(),
     };
   }
 
