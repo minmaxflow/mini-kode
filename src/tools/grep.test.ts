@@ -109,14 +109,14 @@ describe("searchFileContent", () => {
   });
 
   it("should handle patterns with anchors", () => {
-    const content = "single line\nanother line\nfinal line";
-    const regex = /single/;
+    const content = "single line\nanother line\nsingle\nfinal line";
+    const regex = /^single$/;
     const filePath = "/test.txt";
 
     const matches = searchFileContent(content, regex, filePath);
 
     expect(matches).toHaveLength(1);
-    expect(matches[0].line).toBe("single line");
+    expect(matches[0].line).toBe("single");
   });
 
   it("should handle special characters in regex", () => {
