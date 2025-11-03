@@ -83,7 +83,7 @@ export function getToolCallTitle(
         return { key, value: displayPath};
       }
 
-      return { key,  value: String };
+      return { key,  value: String(value) };
     });
 
     // Format output based on parameter count
