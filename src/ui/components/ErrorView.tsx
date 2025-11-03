@@ -15,28 +15,53 @@ export function ErrorView({ message }: ErrorViewProps) {
     const lowerMessage = errorMessage.toLowerCase();
 
     // API key related errors
-    if (lowerMessage.includes("401") || lowerMessage.includes("unauthorized") || lowerMessage.includes("authentication")) {
+    if (
+      lowerMessage.includes("401") ||
+      lowerMessage.includes("unauthorized") ||
+      lowerMessage.includes("authentication")
+    ) {
       suggestions.push("💡 Check your API key configuration");
-      suggestions.push("   • Set MINIKODE_API_KEY environment variable (highest priority)");
-      suggestions.push("   • Or set provider-specific: DEEPSEEK_API_KEY, GLM_API_KEY, or OPENAI_API_KEY");
+      suggestions.push(
+        "   • Set MINIKODE_API_KEY environment variable (highest priority)",
+      );
+      suggestions.push(
+        "   • Or set provider-specific: DEEPSEEK_API_KEY, GLM_API_KEY, or OPENAI_API_KEY",
+      );
     }
 
     // Model not found errors
-    if (lowerMessage.includes("404") || lowerMessage.includes("model not found") || lowerMessage.includes("not found")) {
+    if (
+      lowerMessage.includes("404") ||
+      lowerMessage.includes("model not found") ||
+      lowerMessage.includes("not found")
+    ) {
       suggestions.push("💡 Check model name and availability");
       suggestions.push("   • Verify the model exists for your API provider");
-      suggestions.push("   • Try: mini-kode config set llm.model 'correct-model-name'");
+      suggestions.push(
+        "   • Try: mini-kode config set llm.model 'correct-model-name'",
+      );
     }
 
     // Network/connection errors
-    if (lowerMessage.includes("network") || lowerMessage.includes("connection") || lowerMessage.includes("timeout") || lowerMessage.includes("enotfound")) {
+    if (
+      lowerMessage.includes("network") ||
+      lowerMessage.includes("connection") ||
+      lowerMessage.includes("timeout") ||
+      lowerMessage.includes("enotfound")
+    ) {
       suggestions.push("💡 Check network connectivity and base URL");
       suggestions.push("   • Verify internet connection");
-      suggestions.push("   • Set base URL: mini-kode config set llm.baseURL 'https://api.example.com/v1'");
+      suggestions.push(
+        "   • Set base URL: mini-kode config set llm.baseURL 'https://api.example.com/v1'",
+      );
     }
 
     // Rate limit errors
-    if (lowerMessage.includes("429") || lowerMessage.includes("rate limit") || lowerMessage.includes("too many requests")) {
+    if (
+      lowerMessage.includes("429") ||
+      lowerMessage.includes("rate limit") ||
+      lowerMessage.includes("too many requests")
+    ) {
       suggestions.push("💡 Rate limit exceeded");
       suggestions.push("   • Wait a moment before retrying");
       suggestions.push("   • Check your API quota and billing status");
@@ -63,9 +88,7 @@ export function ErrorView({ message }: ErrorViewProps) {
 
       {suggestions.map((suggestion, index) => (
         <Box key={index}>
-          <Text color={getCurrentTheme().secondary}>
-            {suggestion}
-          </Text>
+          <Text color={getCurrentTheme().secondary}>{suggestion}</Text>
         </Box>
       ))}
     </Box>

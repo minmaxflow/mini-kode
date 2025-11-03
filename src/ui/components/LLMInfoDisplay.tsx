@@ -45,30 +45,22 @@ export function LLMInfoDisplay() {
   return (
     <Box flexDirection="column" marginTop={1}>
       <Box flexDirection="row" gap={1}>
-        <Text color={getCurrentTheme().secondary}>
-          LLM Provider:
-        </Text>
+        <Text color={getCurrentTheme().secondary}>LLM Provider:</Text>
         <Text color={getCurrentTheme().accent}>{providerName}</Text>
       </Box>
 
       <Box flexDirection="row" gap={1}>
-        <Text color={getCurrentTheme().secondary}>
-          Base URL:
-        </Text>
+        <Text color={getCurrentTheme().secondary}>Base URL:</Text>
         <Text>{llmConfig.baseURL}</Text>
       </Box>
 
       <Box flexDirection="row" gap={1}>
-        <Text color={getCurrentTheme().secondary}>
-          Model:
-        </Text>
+        <Text color={getCurrentTheme().secondary}>Model:</Text>
         <Text>{llmConfig.model}</Text>
       </Box>
 
       <Box flexDirection="row" gap={1}>
-        <Text color={getCurrentTheme().secondary}>
-          API Key:
-        </Text>
+        <Text color={getCurrentTheme().secondary}>API Key:</Text>
         <Text color={getCurrentTheme().success}>{maskedApiKey}</Text>
       </Box>
 

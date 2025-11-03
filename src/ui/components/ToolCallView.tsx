@@ -4,7 +4,6 @@ import { Box, Text } from "ink";
 import type { PermissionOption } from "../../permissions/types";
 import type { ToolCall } from "../../tools/runner.types";
 import { getCurrentTheme } from "../../ui/theme";
-import ErrorView from "./ErrorView";
 import PermissionSelector from "./PermissionSelector";
 import { getToolCallTitle } from "./tool-views";
 import { useTerminalWidth } from "../hooks/useTerminalWidth";
@@ -130,6 +129,21 @@ export function ToolCallView({
           )}
         </>
       )}
+    </Box>
+  );
+}
+
+interface ErrorViewProps {
+  message: string;
+}
+
+function ErrorView({ message }: ErrorViewProps) {
+  return (
+    <Box>
+      <Text color={getCurrentTheme().error}>
+        ⎿{"  "}
+        {message}
+      </Text>
     </Box>
   );
 }
