@@ -70,11 +70,12 @@ export function getToolCallTitle(
       }
 
       // Only keep primitive values: string, number, boolean, null, undefined
-      const isPrimitive = value === null ||
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        typeof value === 'boolean' ||
-        typeof value === 'undefined';
+      const isPrimitive =
+        value === null ||
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean" ||
+        typeof value === "undefined";
 
       return isPrimitive;
     });
@@ -82,10 +83,7 @@ export function getToolCallTitle(
     // Format each parameter
     const params = filteredEntries.map(([key, value], _, array) => {
       // Handle file paths
-      if (
-        (key === "filePath" || key === "path") &&
-        typeof value === "string"
-      ) {
+      if ((key === "filePath" || key === "path") && typeof value === "string") {
         if (path.isAbsolute(value)) {
           const absPath = path.resolve(value);
           if (isPathUnderPrefix(absPath, cwd)) {

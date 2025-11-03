@@ -108,7 +108,7 @@ Remember: when making multiple file edits in a row to the same file, you should 
 
 export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
   name: "fileEdit",
-  displayName: "Edit",
+  displayName: "Update",
   description: FILEEDIT_TOOL_PROMPT,
   readonly: false,
   inputSchema: InputSchema,
@@ -166,11 +166,12 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
     }
 
     const matchResult = checkStringMatch(before, input.old_string);
-    if (matchResult === "none")
+    if (matchResult === "none") {
       return {
         isError: true,
         message: "old_string not found",
       };
+    }
     if (matchResult === "more")
       return {
         isError: true,
