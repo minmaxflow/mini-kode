@@ -6,6 +6,32 @@ import { z } from "zod";
 import { Tool, FileEditResult, PermissionRequiredError } from "./types";
 import { checkFsPermission } from "../permissions";
 
+export type MatchResult = "none" | "one" | "more";
+
+/**
+ * Check how many times a substring appears in the content
+ * @param content - The content to search in
+ * @param substring - The substring to search for
+ * @returns "none" if not found, "one" if found once, "more" if found multiple times
+ */
+export function checkStringMatch(
+  content: string,
+  substring: string,
+): MatchResult {
+  if (substring === "") {
+    // Empty string matches at every position, but we treat this as a special case
+    return content.length === 0 ? "none" : "more";
+  }
+
+  const firstIndex = content.indexOf(substring);
+  if (firstIndex === -1) {
+    return "none";
+  }
+
+  const secondIndex = content.indexOf(substring, firstIndex + 1);
+  return secondIndex === -1 ? "one" : "more";
+}
+
 const InputSchema = z.object({
   filePath: z.string().describe("The absolute path to the file to modify"),
   old_string: z
@@ -139,15 +165,13 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       };
     }
 
-    const count = (
-      before.match(new RegExp(escapeRegExp(input.old_string), "g")) || []
-    ).length;
-    if (count === 0)
+    const matchResult = checkStringMatch(before, input.old_string);
+    if (matchResult === "none")
       return {
         isError: true,
         message: "old_string not found",
       };
-    if (count !== 1)
+    if (matchResult === "more")
       return {
         isError: true,
         message: "old_string is not unique",
@@ -175,16 +199,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
     };
   },
 };
-
-/**
- * Escapes special characters in a string for use in a regular expression pattern.
- * This prevents RegExp special characters from being interpreted as regex operators.
- * @param str - The string to escape
- * @returns The escaped string safe for use in RegExp constructor
- */
-function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 /**
  * Calculates the starting line number of the given text in the file content.

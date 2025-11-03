@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
-import { FileEditTool, noteFileReadForEdit } from "./fileEdit";
+import {
+  FileEditTool,
+  noteFileReadForEdit,
+  checkStringMatch,
+} from "./fileEdit";
 import { createTempProject } from "../utils/testHelpers";
 
 describe("FileEditTool", () => {
@@ -67,5 +71,97 @@ describe("FileEditTool", () => {
       { cwd: dir, approvalMode: "default", sessionId: "test-session" },
     );
     expect("isError" in res ? res.isError : false).toBe(true);
+  });
+});
+
+describe("checkStringMatch", () => {
+  it("should return 'none' when substring is not found", () => {
+    const content = "hello world";
+    const substring = "xyz";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("none");
+  });
+
+  it("should return 'one' when substring is found exactly once", () => {
+    const content = "hello world";
+    const substring = "hello";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("one");
+  });
+
+  it("should return 'more' when substring is found multiple times", () => {
+    const content = "hello world, hello universe";
+    const substring = "hello";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("more");
+  });
+
+  it("should handle empty substring correctly", () => {
+    const content = "hello world";
+    const emptySubstring = "";
+
+    const result = checkStringMatch(content, emptySubstring);
+
+    expect(result).toBe("more");
+  });
+
+  it("should handle empty content with empty substring", () => {
+    const content = "";
+    const emptySubstring = "";
+
+    const result = checkStringMatch(content, emptySubstring);
+
+    expect(result).toBe("none");
+  });
+
+  it("should handle special characters correctly", () => {
+    const content = "const regex = /test.*/g;";
+    const substring = "/test.*/";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("one");
+  });
+
+  it("should handle newlines in substring", () => {
+    const content = "line 1\nline 2\nline 3";
+    const substring = "line 2";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("one");
+  });
+
+  it("should handle multiline substring", () => {
+    const content = "start\nmiddle\nend";
+    const substring = "start\nmiddle";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("one");
+  });
+
+  it("should handle overlapping matches correctly", () => {
+    const content = "aaaa";
+    const substring = "aa";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("more");
+  });
+
+  it("should handle very long content efficiently", () => {
+    const content = "a".repeat(10000) + "unique" + "b".repeat(10000);
+    const substring = "unique";
+
+    const result = checkStringMatch(content, substring);
+
+    expect(result).toBe("one");
   });
 });
