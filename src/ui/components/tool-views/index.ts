@@ -60,15 +60,23 @@ export function getToolCallTitle(
       ([, value]) => value !== undefined && value !== null && value !== "",
     );
 
-    // Filter out excluded keys
-    const filteredEntries = entries.filter(([key]) => {
+    // Filter out excluded keys and non-primitive values
+    const filteredEntries = entries.filter(([key, value]) => {
       if (
         toolName === "fileEdit" &&
         (key === "old_string" || key === "new_string")
       ) {
         return false;
       }
-      return true;
+
+      // Only keep primitive values: string, number, boolean, null, undefined
+      const isPrimitive = value === null ||
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        typeof value === 'undefined';
+
+      return isPrimitive;
     });
 
     // Format each parameter
