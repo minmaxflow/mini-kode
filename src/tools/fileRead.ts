@@ -89,10 +89,13 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
 
       // Apply text limits using shared utility with offset support
       const maxLinesToRead = limit ? Math.min(limit, 2000) : 2000;
-      const { content, fileTotalLines, actualOffset, actualLimit } = limitText(raw, {
-        offset: offset ?? 0,
-        maxLines: maxLinesToRead,
-      });
+      const { content, fileTotalLines, actualOffset, actualLimit } = limitText(
+        raw,
+        {
+          offset: offset ?? 0,
+          maxLines: maxLinesToRead,
+        },
+      );
 
       if (context.signal?.aborted)
         return {

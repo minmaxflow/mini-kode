@@ -66,7 +66,7 @@ export function ErrorView({ message }: ErrorViewProps) {
       suggestions.push("   • Wait a moment before retrying");
       suggestions.push("   • Check your API quota and billing status");
     }
-    
+
     return suggestions;
   };
 

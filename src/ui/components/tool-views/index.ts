@@ -61,7 +61,10 @@ export function getToolCallTitle(
       )
       .filter(([key]) => {
         // Exclude old_string and new_string for fileEdit tool
-        if (toolName === "fileEdit" && (key === "old_string" || key === "new_string")) {
+        if (
+          toolName === "fileEdit" &&
+          (key === "old_string" || key === "new_string")
+        ) {
           return false;
         }
         return true;
@@ -84,7 +87,7 @@ export function getToolCallTitle(
     if (params.length === 1) {
       const singleParam = params[0];
       // Extract just the value part (after the colon and space)
-      const colonIndex = singleParam.indexOf(': ');
+      const colonIndex = singleParam.indexOf(": ");
       if (colonIndex > 0) {
         toolInput = singleParam.slice(colonIndex + 2);
       } else {

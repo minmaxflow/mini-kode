@@ -33,7 +33,7 @@ export function TextMessage({ wrappedMessage, index }: TextMessageProps) {
   // Using ● instead of ⏺ for better terminal rendering compatibility
   // ⏺ character caused alignment issues in some terminals due to inconsistent width rendering
   const icon = isUserMessage ? ">" : "●";
-  let color = isUserMessage ? getCurrentTheme().secondary : undefined;
+  let color: string | undefined = undefined;
 
   if (wrappedMessage.status === "error") {
     color = getCurrentTheme().error;
@@ -55,7 +55,7 @@ export function TextMessage({ wrappedMessage, index }: TextMessageProps) {
         {/* Right column: content */}
         <Box flexDirection="column" flexGrow={1}>
           {isUserMessage ? (
-            <Text color={getCurrentTheme().secondary}>
+            <Text>
               {typeof message.content === "string" ? message.content : ""}
             </Text>
           ) : (

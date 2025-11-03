@@ -53,7 +53,7 @@ export function ToolCallView({
       {/* First layer: Tool title with bold toolName */}
       <Text>
         <Text bold>{toolName}</Text>
-        <Text >{toolInput ? `${toolInput ? `(${toolInput})` : ""}` : ""}</Text>
+        <Text>{toolInput ? `${toolInput ? `(${toolInput})` : ""}` : ""}</Text>
       </Text>
 
       {/* Second layer: Status/Result with ⎿  prefix */}
@@ -72,7 +72,9 @@ export function ToolCallView({
       {status === "permission_required" && (
         <Box flexDirection="column">
           <Box>
-            <Text color={getCurrentTheme().warning}>⎿{"  "}Waiting for permission...</Text>
+            <Text color={getCurrentTheme().warning}>
+              ⎿{"  "}Waiting for permission...
+            </Text>
           </Box>
           <Box marginLeft={1}>
             <PermissionSelector
