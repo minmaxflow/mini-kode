@@ -160,9 +160,8 @@ describe("MessageFeed component", () => {
             filePath: "/test/file.txt",
             content: "Tool result",
             offset: 0,
-            limit: 100,
-            totalLines: 1,
-            truncated: false,
+            limit: 1,  // actualLimit: actual number of lines returned
+            fileTotalLines: 1,
           },
         },
       ];
