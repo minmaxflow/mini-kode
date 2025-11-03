@@ -5,6 +5,7 @@ import { z } from "zod";
 import { isPathUnderPrefix } from "../permissions";
 import { Tool, FileReadResult, ToolExecutionContext } from "./types";
 import { noteFileReadForEdit } from "./fileEdit";
+import { limitText } from "./limitUtils";
 
 const InputSchema = z.object({
   filePath: z.string().describe("The absolute path to the file to read"),
@@ -85,10 +86,14 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
       const raw = fs.readFileSync(absolute, "utf8");
       // Record read to enable safe read-before-write flow for FileEditTool
       noteFileReadForEdit(absolute, raw);
-      const lines = raw.split(/\r?\n/);
-      const totalLines = lines.length;
-      const start = offset ?? 0;
-      const end = limit ? Math.min(totalLines, start + limit) : totalLines;
+
+      // Apply text limits using shared utility with offset support
+      const maxLinesToRead = limit ? Math.min(limit, 2000) : 2000;
+      const { content, fileTotalLines, actualOffset, actualLimit } = limitText(raw, {
+        offset: offset ?? 0,
+        maxLines: maxLinesToRead,
+      });
+
       if (context.signal?.aborted)
         return {
           isError: true,
@@ -96,17 +101,16 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
           message: "Aborted",
           filePath: absolute,
         };
-      const slice = lines.slice(start, end).join("\n");
-      const truncated = Boolean(limit && end < totalLines);
 
-      return {
+      const result: FileReadResult = {
         filePath: absolute,
-        content: slice,
-        offset: start,
-        limit: end,
-        totalLines,
-        truncated,
+        content,
+        offset: actualOffset,
+        limit: actualLimit,
+        fileTotalLines,
       };
+
+      return result;
     } catch (err) {
       return {
         isError: true,
