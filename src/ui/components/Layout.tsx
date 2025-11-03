@@ -9,6 +9,7 @@ import MessageFeed from "./MessageFeed";
 import { PromptInput } from "./PromptInput";
 import ErrorView from "./ErrorView";
 import { CommandName } from "../commands";
+import { getCurrentTheme } from "../theme";
 
 export interface LayoutProps {
   cwd: string;
@@ -89,6 +90,15 @@ export function Layout({
       {state.error && (
         <Box marginTop={1}>
           <ErrorView message={state.error} />
+        </Box>
+      )}
+
+      {/* Loading indicator when LLM is generating */}
+      {!hasPermissionRequest && state.isLLMGenerating && (
+        <Box marginTop={1}>
+          <Text color={getCurrentTheme().brand}>
+            {loadingIcons[loadingIconIndex]} (Working... esc to cancel)
+          </Text>
         </Box>
       )}
 
