@@ -49,7 +49,10 @@ export const GlobTool: Tool<GlobInput, GlobResult> = {
     if (context.signal?.aborted)
       return { isError: true, isAborted: true, message: "Aborted" };
 
-    const filesWithStats = matchedFiles.map((p: string) => ({
+    const maxFiles = 500;
+    const limitedFiles = matchedFiles.slice(0, maxFiles);
+
+    const filesWithStats = limitedFiles.map((p: string) => ({
       path: p,
       mtimeMs: fs.statSync(p).mtimeMs,
     }));
@@ -60,6 +63,12 @@ export const GlobTool: Tool<GlobInput, GlobResult> = {
 
     const files = filesWithStats.map((f: { path: string }) => f.path);
 
-    return { pattern: input.pattern, path: root, files };
+    const result: GlobResult = {
+      pattern: input.pattern,
+      path: root,
+      files,
+    };
+
+    return result;
   },
 };
