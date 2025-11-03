@@ -80,6 +80,10 @@ export function getToolCallTitle(
             : value;
           return `${key}: "${displayPath}"`;
         }
+        // For strings, don't use JSON.stringify to avoid extra quotes
+        if (typeof value === "string") {
+          return `${key}: "${value}"`;
+        }
         return `${key}: ${JSON.stringify(value)}`;
       });
 
