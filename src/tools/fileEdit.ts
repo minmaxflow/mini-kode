@@ -118,7 +118,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
         filePath: abs,
         mode: "create",
         success: true,
-        message: "File created",
         oldContent: "",
         newContent: input.new_string,
         editStartLine: 1,
@@ -137,7 +136,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       return {
         isError: true,
         message: "Please read the file first to confirm context.",
-        reason: "read_before_write_missing",
       };
     }
 
@@ -148,13 +146,11 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       return {
         isError: true,
         message: "old_string not found",
-        reason: "not_found",
       };
     if (count !== 1)
       return {
         isError: true,
         message: "old_string is not unique",
-        reason: "non_unique",
       };
 
     if (context.signal?.aborted)
@@ -173,7 +169,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       filePath: abs,
       mode: "update",
       success: true,
-      message: "Edit applied",
       oldContent: input.old_string,
       newContent: input.new_string,
       editStartLine,

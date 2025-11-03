@@ -17,7 +17,7 @@ describe("FileReadTool", () => {
     expect("isError" in res ? res.isError : false).toBe(true);
   });
 
-  it("reads a file with offset/limit and truncation flag", async () => {
+  it("reads a file with offset/limit", async () => {
     const proj = createTempProject();
     const file = path.join(proj, "sample.txt");
     const lines = Array.from({ length: 20 }, (_, i) => `line-${i}`);
@@ -28,7 +28,7 @@ describe("FileReadTool", () => {
     );
     if ("isError" in res) throw new Error("unexpected");
     expect(res.content.split("\n")[0]).toBe("line-5");
-    expect(res.truncated).toBe(true);
+    expect(res.fileTotalLines).toBe(20); // LLM can use this to determine if more content exists
   });
 
   it("errors when reading a directory", async () => {
