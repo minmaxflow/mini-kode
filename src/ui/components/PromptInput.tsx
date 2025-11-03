@@ -519,14 +519,16 @@ export function PromptInput({
           .replace(/\r/g, "\n");
 
         // Clear any existing errors when user starts typing
-        if (state.error) {
-          actions.setError(undefined);
-        }
+        actions.setError(undefined);
 
         // Check for ? at the beginning of input to trigger help mode
-        if (normalizedInput === "?" && currentValue.length === 0 && currentCursor === 0) {
+        if (
+          normalizedInput === "?" &&
+          currentValue.length === 0 &&
+          currentCursor === 0
+        ) {
           // Activate help mode and don't add ? to the input
-          setHelpMode(m => !m);
+          setHelpMode((m) => !m);
           return;
         }
 
@@ -552,7 +554,6 @@ export function PromptInput({
       submit,
       updateRefsAndRerender,
       handleExternalEditor,
-      state.error,
       actions.setError,
       isAgentExecuting,
     ],

@@ -33,9 +33,9 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/clear"
     ? CompactResult
     : T extends "/init"
       ? InitResult
-    : T extends "/mcp"
-      ? MCPResult
-      : never;
+      : T extends "/mcp"
+        ? MCPResult
+        : never;
 
 /**
  * Command call interface - represents a command execution

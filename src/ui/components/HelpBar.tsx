@@ -14,28 +14,34 @@ function MCPStatus({ mcp }: MCPStatusProps) {
     return null;
   }
 
-  const connected = mcp.filter(s => s.status === "connected").length;
-  const connecting = mcp.filter(s => s.status === "connecting").length;
-  const error = mcp.filter(s => s.status === "error").length;
+  const connected = mcp.filter((s) => s.status === "connected").length;
+  const connecting = mcp.filter((s) => s.status === "connecting").length;
+  const error = mcp.filter((s) => s.status === "error").length;
 
   return (
     <Box flexDirection="row" alignItems="center" gap={1}>
       <Text dimColor>MCP:</Text>
       {connected > 0 && (
         <Box flexDirection="row" alignItems="center" gap={1}>
-          <Text dimColor color={getCurrentTheme().success}>●</Text>
+          <Text dimColor color={getCurrentTheme().success}>
+            ●
+          </Text>
           <Text dimColor>{connected}</Text>
         </Box>
       )}
       {connecting > 0 && (
         <Box flexDirection="row" alignItems="center" gap={1}>
-          <Text dimColor color={getCurrentTheme().warning}>●</Text>
+          <Text dimColor color={getCurrentTheme().warning}>
+            ●
+          </Text>
           <Text dimColor>{connecting}</Text>
         </Box>
       )}
       {error > 0 && (
         <Box flexDirection="row" alignItems="center" gap={1}>
-          <Text dimColor color={getCurrentTheme().error}>●</Text>
+          <Text dimColor color={getCurrentTheme().error}>
+            ●
+          </Text>
           <Text dimColor>{error}</Text>
         </Box>
       )}
@@ -91,8 +97,7 @@ export function HelpBar({
   };
 
   const getTokenColor = (tokens: number): string | undefined => {
-    if (tokens < TOKEN_COLOR_THRESHOLDS.WARNING)
-      return undefined; // < 80% - green
+    if (tokens < TOKEN_COLOR_THRESHOLDS.WARNING) return undefined; // < 80% - green
     if (tokens < TOKEN_COLOR_THRESHOLDS.ERROR) return getCurrentTheme().warning; // 80-90% - yellow
     return getCurrentTheme().error; // > 90% - red
   };
@@ -154,7 +159,10 @@ export function HelpBar({
               <Box flexDirection="row" alignItems="center" gap={2}>
                 {rightContent}
                 {tokenDisplay && (
-                  <Text dimColor color={getTokenColor(tokenUsage!.total_tokens)}>
+                  <Text
+                    dimColor
+                    color={getTokenColor(tokenUsage!.total_tokens)}
+                  >
                     {tokenDisplay}
                   </Text>
                 )}

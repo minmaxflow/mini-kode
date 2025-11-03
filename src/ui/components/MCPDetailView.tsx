@@ -51,9 +51,7 @@ const getStatusSymbol = (status: string) => {
  *
  * Displays MCP server status and available tools in a clean layout
  */
-export function MCPDetailView({
-  serverStates,
-}: MCPDetailViewProps) {
+export function MCPDetailView({ serverStates }: MCPDetailViewProps) {
   if (serverStates.length === 0) {
     return (
       <Box flexDirection="column">
@@ -65,8 +63,13 @@ export function MCPDetailView({
   }
 
   // Get connected servers for tools display
-  const connectedServers = serverStates.filter(server => server.status === "connected");
-  const totalTools = connectedServers.reduce((sum, server) => sum + server.tools.length, 0);
+  const connectedServers = serverStates.filter(
+    (server) => server.status === "connected",
+  );
+  const totalTools = connectedServers.reduce(
+    (sum, server) => sum + server.tools.length,
+    0,
+  );
   const terminalWidth = useTerminalWidth();
 
   return (
@@ -116,14 +119,19 @@ export function MCPDetailView({
           </Box>
         ) : (
           connectedServers
-            .flatMap(server => 
-              server.tools.map(tool => ({
+            .flatMap((server) =>
+              server.tools.map((tool) => ({
                 ...tool,
-                serverName: server.name
-              }))
+                serverName: server.name,
+              })),
             )
             .map((tool, index) => (
-              <Box key={`${tool.serverName}-${tool.name}`} flexDirection="row" marginLeft={1} gap={1}>
+              <Box
+                key={`${tool.serverName}-${tool.name}`}
+                flexDirection="row"
+                marginLeft={1}
+                gap={1}
+              >
                 <Box width={50}>
                   <Text>
                     {tool.serverName}.{tool.name}

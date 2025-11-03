@@ -80,7 +80,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
         // Use markdown component for success result
         displayContent = compactResult && (
           <InkMarkdown>{compactResult}</InkMarkdown>
-        )
+        );
         break;
       case "error":
         iconColor = getCurrentTheme().error;

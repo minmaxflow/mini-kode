@@ -34,7 +34,7 @@ export const mcpCommand: CommandHandler<MCPResult> = {
       result: serverStates,
     };
     actions.completeCommandCall(completedCall);
-    
+
     // Return the result
     return serverStates;
   },
