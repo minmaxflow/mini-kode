@@ -68,7 +68,7 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
       if (!stat.isFile())
         return {
           isError: true,
-          message: "Path is not a file",
+          message: "The provided path is not a file (it may be a directory)",
           filePath: absolute,
         };
 
