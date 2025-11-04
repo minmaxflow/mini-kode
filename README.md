@@ -87,6 +87,10 @@ pnpm run test
 
 Want to dive deeper into the system architecture? Check out [docs/README.md](./docs/README.md) for complete system documentation and architecture explanations.
 
+### 📚 Project Analysis
+
+For a comprehensive code analysis and walkthrough, visit [**Mini-Kode Deep Analysis**](https://deepwiki.com/minmaxflow/mini-kode/1-overview) - an in-depth exploration of the codebase architecture, design patterns, and implementation details.
+
 ## 🧠 Project Memory
 
 Mini-Kode automatically uses `AGENTS.md` file in your project root to provide context-aware assistance:
