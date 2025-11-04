@@ -146,3 +146,73 @@ export function isTextFile(filePath: string): boolean {
   // Fallback to content-based detection for unknown extensions
   return isTextFileByContent(filePath);
 }
+
+/**
+ * MIME type detection for web content
+ */
+
+/**
+ * Detected content type from MIME
+ */
+export interface DetectedContentType {
+  mimeType: string;
+  category:
+    | "html"
+    | "text"
+    | "json"
+    | "xml"
+    | "css"
+    | "javascript"
+    | "unsupported";
+}
+
+/**
+ * Parse Content-Type header and extract MIME type
+ *
+ * @param contentType - Content-Type header value
+ * @returns MIME type without charset or other parameters
+ */
+export function parseContentType(contentType: string): string {
+  if (!contentType) return "";
+
+  // Extract MIME type before semicolon
+  const mimeType = contentType.split(";")[0].trim().toLowerCase();
+  return mimeType;
+}
+
+/**
+ * Detect content type from MIME type
+ *
+ * @param mimeType - MIME type string
+ * @returns Detection result with categorization
+ */
+export function detectContentType(mimeType: string): DetectedContentType {
+  const normalizedMime = parseContentType(mimeType);
+
+  // Determine category
+  let category: DetectedContentType["category"];
+
+  if (normalizedMime === "text/html") {
+    category = "html";
+  } else if (
+    normalizedMime === "text/plain" ||
+    normalizedMime === "text/markdown"
+  ) {
+    category = "text";
+  } else if (normalizedMime === "application/json") {
+    category = "json";
+  } else if (normalizedMime.includes("xml")) {
+    category = "xml";
+  } else if (normalizedMime === "text/css") {
+    category = "css";
+  } else if (normalizedMime.includes("javascript")) {
+    category = "javascript";
+  } else {
+    category = "unsupported";
+  }
+
+  return {
+    mimeType: normalizedMime,
+    category,
+  };
+}
