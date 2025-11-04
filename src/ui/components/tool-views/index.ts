@@ -13,6 +13,7 @@ import { isPathUnderPrefix } from "../../../permissions";
 import type {
   ArchitectSuccess,
   BashSuccess,
+  FetchSuccess,
   FileEditSuccess,
   FileReadSuccess,
   GlobSuccess,
@@ -23,6 +24,7 @@ import type {
 import type { ToolCall } from "../../../tools/runner.types";
 import { ArchitectResultView } from "./ArchitectResultView";
 import { BashResultView } from "./BashResultView";
+import { FetchResultView } from "./FetchResultView";
 import { FileEditResultView } from "./FileEditResultView";
 import { FileReadResultView } from "./FileReadResultView";
 import { GlobResultView } from "./GlobResultView";
@@ -132,6 +134,11 @@ export function getToolResultView(
       return (toolCall) =>
         React.createElement(BashResultView, {
           result: toolCall.result as BashSuccess,
+        });
+    case "fetch":
+      return (toolCall) =>
+        React.createElement(FetchResultView, {
+          result: toolCall.result as FetchSuccess,
         });
     case "fileRead":
       return (toolCall) =>

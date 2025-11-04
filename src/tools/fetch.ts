@@ -10,18 +10,40 @@ import { Tool, FetchResult, ToolExecutionContext } from "./types";
 
 const InputSchema = z.object({
   url: z.string().url().describe("The URL to fetch content from"),
+  maxLength: z.number().default(50000).describe("Maximum length of content to return (default: 50000 characters)"),
 });
 
-export type FetchInput = z.infer<typeof InputSchema>;
+export type FetchInput = {
+  url: string;
+  maxLength?: number;
+};
 
 export const FETCH_TOOL_PROMPT: string = `
-Fetches web content from the specified URL and converts it to markdown format when possible.
+Fetches text-based web content from HTTP/HTTPS URLs for analysis and information extraction.
 
-- Supports HTML, text, JSON, XML, CSS, and JavaScript content
-- Converts HTML to markdown
-- Images and binary content are not supported
-- Text content is returned as-is
-- Returns the content with MIME type
+USE THIS TOOL WHEN:
+- You need to read and analyze web page content
+- You need to extract information from websites
+- You need to get text content from documentation, articles, or forums
+- You need to analyze webpage content for any purpose
+
+PREFER OTHER TOOLS WHEN:
+- You need to interact with a specific API service
+- You need to perform specific actions on a website
+- You need to navigate or interact with web pages
+
+FEATURES:
+- Supports only HTTP and HTTPS protocols
+- Fetches HTML, text, JSON, XML, and markdown content
+- Automatically converts HTML to markdown for better readability
+- Returns raw text content with MIME type information
+
+EXAMPLE USE CASES:
+- Reading Reddit posts and comments for analysis
+- Extracting information from documentation pages
+- Analyzing news articles or blog posts
+- Getting content from forums or discussion boards
+- Reading any web page for text analysis purposes
 `.trim();
 
 export const FetchTool: Tool<FetchInput, FetchResult> = {
@@ -43,7 +65,7 @@ export const FetchTool: Tool<FetchInput, FetchResult> = {
       };
     }
 
-    const { url } = input;
+    const { url, maxLength = 50000 } = input;
 
     // Validate URL scheme
     const urlObj = new URL(url);
@@ -128,6 +150,7 @@ export const FetchTool: Tool<FetchInput, FetchResult> = {
       }
 
       let processedContent = content;
+      let finalMimeType = mimeType;
 
       // Convert HTML to markdown if needed
       if (isHtmlContent(contentType)) {
@@ -139,7 +162,20 @@ export const FetchTool: Tool<FetchInput, FetchResult> = {
             fence: "```",
           });
 
+          // Remove script, style, and other elements that add noise to markdown output
+          turndownService.remove([
+            'script',      // JavaScript code
+            'style',       // CSS styles
+            'iframe',      // Embedded content
+            'img',         // Images (alt text is preserved)
+            'video',       // Video content
+            'audio',       // Audio content
+            'noscript',    // Fallback content
+            'canvas',      // Canvas elements
+          ]);
+
           processedContent = turndownService.turndown(content);
+          finalMimeType = "text/markdown"; // Update MIME type to markdown
         } catch (error) {
           return {
             isError: true,
@@ -148,10 +184,16 @@ export const FetchTool: Tool<FetchInput, FetchResult> = {
         }
       }
 
+      // Apply maxLength limit if specified
+      let finalContent = processedContent;
+      if (maxLength && finalContent.length > maxLength) {
+        finalContent = finalContent.substring(0, maxLength) + '\n\n[Content truncated due to length limit]';
+      }
+
       return {
         url: input.url,
-        content: processedContent,
-        mimeType,
+        content: finalContent,
+        mimeType: finalMimeType,
       };
     } catch (error) {
       if (error instanceof Error) {

@@ -508,7 +508,7 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
 
   // Initial data - can be debug data or empty state depending on configuration
   const initialData = useDebugData
-    ? createDebugAppState(false)
+    ? createDebugAppState(true)
     : {
         messages: [],
         toolCalls: [],

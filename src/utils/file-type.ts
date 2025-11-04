@@ -148,25 +148,6 @@ export function isTextFile(filePath: string): boolean {
 }
 
 /**
- * MIME type detection for web content
- */
-
-/**
- * Detected content type from MIME
- */
-export interface DetectedContentType {
-  mimeType: string;
-  category:
-    | "html"
-    | "text"
-    | "json"
-    | "xml"
-    | "css"
-    | "javascript"
-    | "unsupported";
-}
-
-/**
  * Parse Content-Type header and extract MIME type
  *
  * @param contentType - Content-Type header value
@@ -181,38 +162,30 @@ export function parseContentType(contentType: string): string {
 }
 
 /**
- * Detect content type from MIME type
+ * Check if MIME type is HTML (needs markdown conversion)
  *
  * @param mimeType - MIME type string
- * @returns Detection result with categorization
+ * @returns true if content is HTML
  */
-export function detectContentType(mimeType: string): DetectedContentType {
+export function isHtmlContent(mimeType: string): boolean {
   const normalizedMime = parseContentType(mimeType);
+  return normalizedMime === "text/html";
+}
 
-  // Determine category
-  let category: DetectedContentType["category"];
-
-  if (normalizedMime === "text/html") {
-    category = "html";
-  } else if (
+/**
+ * Check if MIME type is supported text content
+ *
+ * @param mimeType - MIME type string
+ * @returns true if content is supported for processing
+ */
+export function isSupportedTextContent(mimeType: string): boolean {
+  const normalizedMime = parseContentType(mimeType);
+  return (
+    normalizedMime === "text/html" ||
     normalizedMime === "text/plain" ||
-    normalizedMime === "text/markdown"
-  ) {
-    category = "text";
-  } else if (normalizedMime === "application/json") {
-    category = "json";
-  } else if (normalizedMime.includes("xml")) {
-    category = "xml";
-  } else if (normalizedMime === "text/css") {
-    category = "css";
-  } else if (normalizedMime.includes("javascript")) {
-    category = "javascript";
-  } else {
-    category = "unsupported";
-  }
-
-  return {
-    mimeType: normalizedMime,
-    category,
-  };
+    normalizedMime === "text/markdown" ||
+    normalizedMime === "text/xml" ||
+    normalizedMime === "application/json" ||
+    normalizedMime === "application/xml"
+  );
 }

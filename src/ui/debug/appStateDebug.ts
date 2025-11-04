@@ -362,15 +362,7 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
           message: "Tool execution was aborted",
         },
       },
-      // fileRead - permission_denied
-      {
-        toolName: "fileRead",
-        requestId: "fileRead-permission_denied",
-        status: "permission_denied",
-        input: { filePath: "/etc/shadow", offset: 0, limit: 10 },
-        startedAt: new Date(Date.now() - 3000).toISOString(),
-        endedAt: new Date(Date.now() - 2500).toISOString(),
-      },
+
       // fileEdit - success
       {
         toolName: "fileEdit",
@@ -552,15 +544,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
           message: "Tool execution was aborted",
         },
       },
-      // grep - permission_denied
-      {
-        toolName: "grep",
-        requestId: "grep-permission_denied",
-        status: "permission_denied",
-        input: { pattern: "secret", glob: "/etc/*", output_mode: "content" },
-        startedAt: new Date(Date.now() - 200).toISOString(),
-        endedAt: new Date(Date.now() - 100).toISOString(),
-      },
+
       // listFiles - success
       {
         toolName: "listFiles",
@@ -606,15 +590,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
           message: "Tool execution was aborted",
         },
       },
-      // listFiles - permission_denied
-      {
-        toolName: "listFiles",
-        requestId: "listFiles-permission_denied",
-        status: "permission_denied",
-        input: { path: "/root" },
-        startedAt: new Date(Date.now() - 4).toISOString(),
-        endedAt: new Date(Date.now() - 3).toISOString(),
-      },
+
       // glob - success
       {
         toolName: "glob",
@@ -656,15 +632,67 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
           message: "Tool execution was aborted",
         },
       },
-      // glob - permission_denied
+
+      // fetch - success
       {
-        toolName: "glob",
-        requestId: "glob-permission_denied",
-        status: "permission_denied",
-        input: { pattern: "/etc/*" },
-        startedAt: new Date(Date.now() - 0.5).toISOString(),
-        endedAt: new Date(Date.now() - 0.4).toISOString(),
+        toolName: "fetch",
+        requestId: "fetch-success",
+        status: "success",
+        input: { url: "https://api.example.com/data" },
+        startedAt: new Date(Date.now() - 0.35).toISOString(),
+        endedAt: new Date(Date.now() - 0.3).toISOString(),
+        result: {
+          type: "fetch",
+          url: "https://api.example.com/data",
+          mimeType: "application/json",
+          content: '{"message": "Success", "data": {"id": 1, "name": "Example"}}',
+          truncated: false,
+        },
       },
+      // fetch - HTML content
+      {
+        toolName: "fetch",
+        requestId: "fetch-html",
+        status: "success",
+        input: { url: "https://example.com" },
+        startedAt: new Date(Date.now() - 0.3).toISOString(),
+        endedAt: new Date(Date.now() - 0.25).toISOString(),
+        result: {
+          type: "fetch",
+          url: "https://example.com",
+          mimeType: "text/markdown",
+          content: "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n## What is Example Domain?\n\nExample Domain is a domain that has been reserved for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n## More Information\n\nThis domain is established to be used for illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n## Example Usage\n\nYou can use this domain in examples and documentation for various purposes. The domain is specifically designed for documentation and educational materials.\n\n## Important Notes\n\n- No prior coordination is needed\n- No permission is required\n- Designed for illustrative purposes\n- Perfect for documentation examples\n- Safe for educational content\n\n## Conclusion\n\nThis domain serves as a reliable example domain for all your documentation and educational needs. You can reference it freely in your materials.\n\n## Additional Details\n\nWhen creating documentation, tutorials, or technical examples, having a reliable example domain is crucial. This reserved domain provides exactly that functionality without any restrictions or complications.\n\n## Technical Implementation\n\nThe domain is managed and maintained to provide a stable, reliable example domain for developers, writers, and educators worldwide. It ensures that your examples will always work consistently across different platforms and applications.",
+          truncated: false,
+        },
+      },
+      // fetch - error
+      {
+        toolName: "fetch",
+        requestId: "fetch-error",
+        status: "error",
+        input: { url: "https://nonexistent.example.com" },
+        startedAt: new Date(Date.now() - 0.2).toISOString(),
+        endedAt: new Date(Date.now() - 0.15).toISOString(),
+        result: {
+          isError: true,
+          message: "Failed to fetch: ENOTFOUND",
+        },
+      },
+      // fetch - abort
+      {
+        toolName: "fetch",
+        requestId: "fetch-abort",
+        status: "abort",
+        input: { url: "https://slow.example.com/large-file" },
+        startedAt: new Date(Date.now() - 0.1).toISOString(),
+        endedAt: new Date(Date.now() - 0.05).toISOString(),
+        result: {
+          isError: true,
+          isAborted: true,
+          message: "Tool execution was aborted",
+        },
+      },
+
       // architect - success
       {
         toolName: "architect",
@@ -705,15 +733,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
           message: "Tool execution was aborted",
         },
       },
-      // architect - permission_denied
-      {
-        toolName: "architect",
-        requestId: "architect-permission_denied",
-        status: "permission_denied",
-        input: { prompt: "Analyze sensitive system files" },
-        startedAt: new Date(Date.now() - 0.03).toISOString(),
-        endedAt: new Date(Date.now() - 0.02).toISOString(),
-      },
+
       // todo_read - success
       {
         toolName: "todo_read",
@@ -773,15 +793,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
           message: "Tool execution was aborted",
         },
       },
-      // todo_read - permission_denied
-      {
-        toolName: "todo_read",
-        requestId: "todo_read-permission_denied",
-        status: "permission_denied",
-        input: {},
-        startedAt: new Date(Date.now() - 0.005).toISOString(),
-        endedAt: new Date(Date.now() - 0.004).toISOString(),
-      },
+
       // todo_write - success
       {
         toolName: "todo_write",
@@ -878,17 +890,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
           message: "Tool execution was aborted",
         },
       },
-      // todo_write - permission_denied
-      {
-        toolName: "todo_write",
-        requestId: "todo_write-permission_denied",
-        status: "permission_denied",
-        input: {
-          todos: [{ id: "1", content: "Malicious todo", status: "pending" }],
-        },
-        startedAt: new Date(Date.now() - 0.0001).toISOString(),
-        endedAt: new Date(Date.now() - 0.00005).toISOString(),
-      },
+
     ];
 
     // Create assistant message with comprehensive tool calls
@@ -979,15 +981,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
                   '{"filePath": "/huge/file.txt", "offset": 0, "limit": 10000}',
               },
             },
-            {
-              id: "fileRead-permission_denied",
-              type: "function",
-              function: {
-                name: "fileRead",
-                arguments:
-                  '{"filePath": "/etc/shadow", "offset": 0, "limit": 10}',
-              },
-            },
+
             // fileEdit tools
             {
               id: "fileEdit-success",
@@ -1057,15 +1051,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
                   '{"pattern": "slow", "glob": "**/*", "output_mode": "content"}',
               },
             },
-            {
-              id: "grep-permission_denied",
-              type: "function",
-              function: {
-                name: "grep",
-                arguments:
-                  '{"pattern": "secret", "glob": "/etc/*", "output_mode": "content"}',
-              },
-            },
+
             // listFiles tools
             {
               id: "listFiles-success",
@@ -1088,11 +1074,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
                 arguments: '{"path": "/huge/directory"}',
               },
             },
-            {
-              id: "listFiles-permission_denied",
-              type: "function",
-              function: { name: "listFiles", arguments: '{"path": "/root"}' },
-            },
+
             // glob tools
             {
               id: "glob-success",
@@ -1109,11 +1091,41 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: { name: "glob", arguments: '{"pattern": "**/*"}' },
             },
+
+            // fetch tools
             {
-              id: "glob-permission_denied",
+              id: "fetch-success",
               type: "function",
-              function: { name: "glob", arguments: '{"pattern": "/etc/*"}' },
+              function: {
+                name: "fetch",
+                arguments: '{"url": "https://api.example.com/data"}',
+              },
             },
+            {
+              id: "fetch-html",
+              type: "function",
+              function: {
+                name: "fetch",
+                arguments: '{"url": "https://example.com"}',
+              },
+            },
+            {
+              id: "fetch-error",
+              type: "function",
+              function: {
+                name: "fetch",
+                arguments: '{"url": "https://nonexistent.example.com"}',
+              },
+            },
+            {
+              id: "fetch-abort",
+              type: "function",
+              function: {
+                name: "fetch",
+                arguments: '{"url": "https://slow.example.com/large-file"}',
+              },
+            },
+
             // architect tools
             {
               id: "architect-success",
@@ -1139,14 +1151,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
                 arguments: '{"prompt": "Very long analysis request"}',
               },
             },
-            {
-              id: "architect-permission_denied",
-              type: "function",
-              function: {
-                name: "architect",
-                arguments: '{"prompt": "Analyze sensitive system files"}',
-              },
-            },
+
             // todo_read tools
             {
               id: "todo_read-success",
@@ -1163,11 +1168,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: { name: "todo_read", arguments: "{}" },
             },
-            {
-              id: "todo_read-permission_denied",
-              type: "function",
-              function: { name: "todo_read", arguments: "{}" },
-            },
+
             // todo_write tools
             {
               id: "todo_write-success",
@@ -1196,15 +1197,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
                   '{"todos": [{"id": "bulk", "content": "Bulk todo item", "status": "pending", "priority": "medium"}]}',
               },
             },
-            {
-              id: "todo_write-permission_denied",
-              type: "function",
-              function: {
-                name: "todo_write",
-                arguments:
-                  '{"todos": [{"id": "1", "content": "Malicious todo", "status": "pending"}]}',
-              },
-            },
+
           ],
         },
       },

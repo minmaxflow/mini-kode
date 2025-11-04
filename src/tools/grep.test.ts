@@ -165,4 +165,14 @@ describe("GrepTool", () => {
     expect(res.matches.some((m) => m.filePath === a)).toBe(true);
     expect(res.matches.some((m) => m.filePath === b)).toBe(false);
   });
+
+  it("should find TOOL_PROMPT in grep.ts file", async () => {
+    const res = await GrepTool.execute(
+      { pattern: "TOOL_PROMPT", glob: "src/tools/grep.ts" },
+      { cwd: process.cwd(), approvalMode: "default", sessionId: "test-session" },
+    );
+    if ("isError" in res) throw new Error("unexpected");
+    expect(res.matches.length).toBeGreaterThan(0);
+    expect(res.matches.some((m) => m.filePath.includes("src/tools/grep.ts"))).toBe(true);
+  });
 });

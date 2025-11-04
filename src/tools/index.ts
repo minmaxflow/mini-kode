@@ -9,6 +9,7 @@ export * from "./architect";
 export * from "./todo";
 export * from "./runner";
 export * from "./openai";
+export * from "./fetch";
 
 import { FileReadTool } from "./fileRead";
 import { ListFilesTool } from "./listFiles";
@@ -18,6 +19,7 @@ import { FileEditTool } from "./fileEdit";
 import { BashTool } from "./bash";
 import { ArchitectTool } from "./architect";
 import { TodoReadTool, TodoWriteTool } from "./todo";
+import { FetchTool } from "./fetch";
 import type { Tool } from "./types";
 
 /**
@@ -38,6 +40,7 @@ export const ALL_TOOLS = [
   ArchitectTool,
   TodoReadTool,
   TodoWriteTool,
+  FetchTool,
 ] as const;
 
 /**
@@ -55,6 +58,7 @@ const TOOLS_BY_NAME = {
   architect: ArchitectTool,
   todo_read: TodoReadTool,
   todo_write: TodoWriteTool,
+  fetch: FetchTool,
 } as const;
 
 /**
