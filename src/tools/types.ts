@@ -176,8 +176,6 @@ export type FileEditSuccessType = {
   filePath: string;
   mode: "create" | "update";
   success: true;
-  oldContent?: string;
-  newContent: string;
   editStartLine: number;
 };
 

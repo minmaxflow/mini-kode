@@ -370,17 +370,7 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         status: "success",
         input: {
           filePath: "/src/components/UserProfile.tsx",
-        },
-        startedAt: new Date(Date.now() - 2000).toISOString(),
-        endedAt: new Date(Date.now() - 1500).toISOString(),
-        result: {
-          type: "fileEdit",
-          filePath: "/src/components/UserProfile.tsx",
-          mode: "update",
-          success: true,
-          message: "Edit applied",
-          editStartLine: 15,
-          oldContent: `function UserProfile({ name, email }: { name: string; email: string }) {
+          old_string: `function UserProfile({ name, email }: { name: string; email: string }) {
   return (
     <div>
       <h2>{name}</h2>
@@ -388,7 +378,7 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
     </div>
   );
 }`,
-          newContent: `function UserProfile({ name, email, avatar }: { name: string; email: string; avatar?: string }) {
+          new_string: `function UserProfile({ name, email, avatar }: { name: string; email: string; avatar?: string }) {
   return (
     <div className="user-profile">
       {avatar && <img src={avatar} alt={name} className="avatar" />}
@@ -400,6 +390,15 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
   );
 }`,
         },
+        startedAt: new Date(Date.now() - 2000).toISOString(),
+        endedAt: new Date(Date.now() - 1500).toISOString(),
+        result: {
+          type: "fileEdit",
+          filePath: "/src/components/UserProfile.tsx",
+          mode: "update",
+          success: true,
+          editStartLine: 15,
+        },
       },
       // fileEdit - create (new file)
       {
@@ -409,17 +408,7 @@ export function createDebugAppState(showAllToolStates: boolean = false): {
         input: {
           filePath: "/src/components/Avatar.tsx",
           old_string: "",
-        },
-        startedAt: new Date(Date.now() - 1600).toISOString(),
-        endedAt: new Date(Date.now() - 1550).toISOString(),
-        result: {
-          type: "fileEdit",
-          filePath: "/src/components/Avatar.tsx",
-          mode: "create",
-          success: true,
-          message: "File created",
-          oldContent: "",
-          newContent: `import React from 'react';
+          new_string: `import React from 'react';
 
 interface AvatarProps {
   src?: string;
@@ -447,13 +436,21 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
 
   // Default avatar with initials
   const initials = alt.split(' ').map(word => word[0]).join('').toUpperCase();
-  
+
   return (
     <div className={\`\${sizeClasses[size]} rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold \${className || ''}\`}>
       {initials}
     </div>
   );
 }`,
+        },
+        startedAt: new Date(Date.now() - 1600).toISOString(),
+        endedAt: new Date(Date.now() - 1550).toISOString(),
+        result: {
+          type: "fileEdit",
+          filePath: "/src/components/Avatar.tsx",
+          mode: "create",
+          success: true,
           editStartLine: 1,
         },
       },
@@ -464,6 +461,8 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         status: "error",
         input: {
           filePath: "/nonexistent.txt",
+          old_string: "some content",
+          new_string: "new content",
         },
         startedAt: new Date(Date.now() - 1400).toISOString(),
         endedAt: new Date(Date.now() - 1300).toISOString(),
@@ -477,7 +476,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         toolName: "fileEdit",
         requestId: "fileEdit-abort",
         status: "abort",
-        input: { filePath: "/huge/file.txt" },
+        input: {
+          filePath: "/huge/file.txt",
+          old_string: "old content",
+          new_string: "new content",
+        },
         startedAt: new Date(Date.now() - 1200).toISOString(),
         endedAt: new Date(Date.now() - 1100).toISOString(),
         result: {
@@ -491,7 +494,11 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         toolName: "fileEdit",
         requestId: "fileEdit-permission_denied",
         status: "permission_denied",
-        input: { filePath: "/etc/passwd" },
+        input: {
+          filePath: "/etc/passwd",
+          old_string: "old content",
+          new_string: "new content",
+        },
         startedAt: new Date(Date.now() - 1000).toISOString(),
         endedAt: new Date(Date.now() - 900).toISOString(),
       },
@@ -1042,7 +1049,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: {
                 name: "fileEdit",
-                arguments: '{"filePath": "/src/components/UserProfile.tsx"}',
+                arguments: '{"filePath": "/src/components/UserProfile.tsx", "old_string": "function UserProfile({ name, email }: { name: string; email: string }) {\\n  return (\\n    <div>\\n      <h2>{name}</h2>\\n      <p>{email}</p>\\n    </div>\\n  );\\n}", "new_string": "function UserProfile({ name, email, avatar }: { name: string; email: string; avatar?: string }) {\\n  return (\\n    <div className=\\"user-profile\\">\\n      {avatar && <img src={avatar} alt={name} className=\\"avatar\\" />}\\n      <div className=\\"user-info\\">\\n        <h2>{name}</h2>\\n        <p>{email}</p>\\n      </div>\\n    </div>\\n  );\\n}"}',
               },
             },
             {
@@ -1050,7 +1057,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: {
                 name: "fileEdit",
-                arguments: '{"filePath": "/src/components/Avatar.tsx"}',
+                arguments: '{"filePath": "/src/components/Avatar.tsx", "old_string": "", "new_string": "import React from \'react\';\\n\\ninterface AvatarProps {\\n  src?: string;\\n  alt: string;\\n  size?: \'small\' | \'medium\' | \'large\';\\n  className?: string;\\n}\\n\\nexport function Avatar({ src, alt, size = \'medium\', className }: AvatarProps) {\\n  const sizeClasses = {\\n    small: \'w-8 h-8\',\\n    medium: \'w-12 h-12\',\\n    large: \'w-16 h-16\',\\n  };\\n\\n  if (src) {\\n    return (\\n      <img\\n        src={src}\\n        alt={alt}\\n        className={\\`\\${sizeClasses[size]} rounded-full object-cover \\${className || \'\'}\\`}\\n      />\\n    );\\n  }\\n\\n  // Default avatar with initials\\n  const initials = alt.split(\' \').map(word => word[0]).join(\'\').toUpperCase();\\n  \\n  return (\\n    <div className={\\`\\${sizeClasses[size]} rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold \\${className || \'\'}\\`}>\\n      {initials}\\n    </div>\\n  );\\n}"}',
               },
             },
             {
@@ -1058,7 +1065,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: {
                 name: "fileEdit",
-                arguments: '{"filePath": "/nonexistent.txt"}',
+                arguments: '{"filePath": "/nonexistent.txt", "old_string": "some content", "new_string": "new content"}',
               },
             },
             {
@@ -1066,7 +1073,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: {
                 name: "fileEdit",
-                arguments: '{"filePath": "/huge/file.txt"}',
+                arguments: '{"filePath": "/huge/file.txt", "old_string": "old content", "new_string": "new content"}',
               },
             },
             {
@@ -1074,7 +1081,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
               type: "function",
               function: {
                 name: "fileEdit",
-                arguments: '{"filePath": "/etc/passwd"}',
+                arguments: '{"filePath": "/etc/passwd", "old_string": "old content", "new_string": "new content"}',
               },
             },
             // grep tools

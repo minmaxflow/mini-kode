@@ -4,6 +4,7 @@ import path from "path";
 import { useTerminalWidth } from "../../hooks/useTerminalWidth";
 import { getCurrentTheme } from "../../theme";
 import { FileEditSuccessType } from "../../../tools";
+import type { ToolCall } from "../../../tools/runner.types";
 
 interface DiffLine {
   type: "added" | "removed" | "unchanged";
@@ -153,14 +154,20 @@ function DiffHeader({
 export function FileEditResultView({
   result,
   cwd,
+  toolCall,
 }: {
   result: FileEditSuccessType;
   cwd: string;
+  toolCall: ToolCall;
 }) {
+  // Get content from input instead of result
+  const oldContent = toolCall.input.old_string as string || "";
+  const newContent = toolCall.input.new_string as string || "";
+  
   const diffLines = calculateDiff(
     result.editStartLine,
-    result.newContent,
-    result.oldContent,
+    newContent,
+    oldContent,
   );
   const stats = calculateDiffStats(diffLines);
 
@@ -184,7 +191,7 @@ export function FileEditResultView({
         filePath={result.filePath}
         added={stats.added}
         removed={stats.removed}
-        action={result.oldContent ? "Update" : "Create"}
+        action={oldContent ? "Update" : "Create"}
       />
       {hasChanges ? (
         <Box flexDirection="column">

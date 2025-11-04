@@ -52,7 +52,24 @@ export function getToolCallTitle(
   // Get display name from tool definition
   const toolsByName = getToolsByName();
   const tool = toolsByName[toolName];
-  const displayToolName = tool?.displayName || toolName;
+
+  let displayToolName: string;
+  if (!tool) {
+    // For unknown tools, convert camelCase to readable format
+    // Example: "fileWrite" → "File Write", "sendEmail" → "Send Email"
+    displayToolName = toolName
+      .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+      .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
+      .trim();
+
+    // For unknown tools, don't show input parameters to avoid confusion
+    return {
+      toolName: displayToolName,
+      toolInput: "",
+    };
+  } else {
+    displayToolName = tool.displayName || toolName;
+  }
 
   // Special handling for file paths to show relative paths
   let toolInput = "";
@@ -150,6 +167,7 @@ export function getToolResultView(
         React.createElement(FileEditResultView, {
           result: toolCall.result as FileEditSuccess,
           cwd,
+          toolCall,
         });
     case "listFiles":
       return (toolCall) =>

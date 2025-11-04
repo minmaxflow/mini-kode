@@ -5,6 +5,7 @@ import {
   FileEditTool,
   noteFileReadForEdit,
   checkStringMatch,
+  calculateStartLineNumber,
 } from "./fileEdit";
 import { createTempProject } from "../utils/testHelpers";
 
@@ -31,6 +32,7 @@ describe("FileEditTool", () => {
     );
     if ("isError" in res) throw new Error("unexpected error");
     expect(res.success).toBe(true);
+    expect(res.editStartLine).toBe(2); // Line 2 contains "y"
     const after = fs.readFileSync(file, "utf8");
     expect(after.includes("Y")).toBe(true);
   });
@@ -45,6 +47,7 @@ describe("FileEditTool", () => {
     if ("isError" in res) throw new Error("unexpected error");
     expect(res.success).toBe(true);
     expect(res.mode).toBe("create");
+    expect(res.editStartLine).toBe(1); // New files start at line 1
     const after = fs.readFileSync(file, "utf8");
     expect(after).toBe("content");
   });
@@ -163,5 +166,79 @@ describe("checkStringMatch", () => {
     const result = checkStringMatch(content, substring);
 
     expect(result).toBe("one");
+  });
+});
+
+describe("calculateStartLineNumber", () => {
+  it("should return the correct line number for single-line text", () => {
+    const content = "line 1\nline 2\nline 3\nline 4";
+    const searchText = "line 3";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(3);
+  });
+
+  it("should return the correct line number for multi-line text", () => {
+    const content = "line 1\nline 2\nline 3\nline 4\nline 5";
+    const searchText = "line 3\nline 4";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(3);
+  });
+
+  it("should return 1 when text is not found", () => {
+    const content = "line 1\nline 2\nline 3";
+    const searchText = "not found";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(1);
+  });
+
+  it("should return 1 when text is empty", () => {
+    const content = "line 1\nline 2\nline 3";
+    const searchText = "";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(1);
+  });
+
+  it("should handle single character matches", () => {
+    const content = "a\nb\nc\nd";
+    const searchText = "c";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(3);
+  });
+
+  it("should handle text with indentation", () => {
+    const content = "line 1\n  indented line\nline 3";
+    const searchText = "  indented line";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(2);
+  });
+
+  it("should handle complex multi-line matches", () => {
+    const content = "function test() {\n  const x = 1;\n  return x;\n}\n\nfunction another() {\n  return 2;\n}";
+    const searchText = "function test() {\n  const x = 1;\n  return x;\n}";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(1);
+  });
+
+  it("should handle content with only newlines", () => {
+    const content = "\n\n\n";
+    const searchText = "";
+
+    const result = calculateStartLineNumber(content, searchText);
+
+    expect(result).toBe(1);
   });
 });

@@ -144,8 +144,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
         filePath: abs,
         mode: "create",
         success: true,
-        oldContent: "",
-        newContent: input.new_string,
         editStartLine: 1,
       };
     }
@@ -194,8 +192,6 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       filePath: abs,
       mode: "update",
       success: true,
-      oldContent: input.old_string,
-      newContent: input.new_string,
       editStartLine,
     };
   },
