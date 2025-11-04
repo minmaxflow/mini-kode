@@ -67,3 +67,19 @@ All comments must be in English for consistency.
 - **Fine-grained Permissions**: Project-level and session-level control
 - **Streaming Responses**: Real-time output during execution
 - **Configuration Management**: Multi-layer config with CLI commands
+
+## Release Process
+
+### Publishing to NPM
+
+**Manual Release Process:**
+```bash
+# 1. Update version number in package.json
+
+# 2. Publish to NPM (automatically runs build and test)
+pnpm publish
+
+# The postpublish script will automatically:
+# - Create git tag with version number
+# - Push tags to remote repository
+```

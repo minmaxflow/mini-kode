@@ -1,6 +1,6 @@
 {
   "name": "mini-kode",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "An educational AI coding assistant CLI tool for learning modern AI coding assistant systems",
   "type": "module",
   "files": [
