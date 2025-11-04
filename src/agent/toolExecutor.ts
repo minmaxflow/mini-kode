@@ -97,8 +97,16 @@ export async function executeToolsWithPermission(
     const tool = toolsByName[call.name];
 
     if (!tool) {
-      // Unknown tool - throw immediately
-      throw new Error(`Unknown tool: ${call.name}`);
+      // Unknown tool - create error result instead of throwing
+      toolCallsToExecute.push({
+        toolName: call.name,
+        requestId: call.id,
+        status: "pending" as const,
+        input: call.arguments,
+        startedAt: new Date().toISOString(),
+        unknownTool: true,
+      });
+      continue;
     }
 
     toolCallsToExecute.push({
@@ -152,7 +160,41 @@ async function executeToolsConcurrently(
   };
 
   // Notify tool start for all tools before concurrent execution
+  // Handle unknown tools separately
+  const knownTools: ToolCallPending[] = [];
+  const unknownTools: ToolCallPending[] = [];
+
   for (const toolCall of toolCalls) {
+    if (toolCall.unknownTool) {
+      unknownTools.push(toolCall);
+    } else {
+      knownTools.push(toolCall);
+    }
+  }
+
+  // Process unknown tools immediately with error results
+  const unknownToolResults: ToolCall[] = unknownTools.map(toolCall => {
+    const executingCall: ToolCallRunning = {
+      ...toolCall,
+      status: "executing" as const,
+    };
+    callbacks.onToolStart?.(executingCall);
+
+    const errorResult: ToolCall = {
+      ...toolCall,
+      status: "error" as const,
+      endedAt: new Date().toISOString(),
+      result: {
+        isError: true,
+        message: `Unknown tool: ${toolCall.toolName}`,
+      },
+    };
+    callbacks.onToolComplete?.(errorResult);
+    return errorResult;
+  });
+
+  // Notify tool start for known tools
+  for (const toolCall of knownTools) {
     const executingCall: ToolCallRunning = {
       ...toolCall,
       status: "executing" as const,
@@ -164,12 +206,19 @@ async function executeToolsConcurrently(
   const results: ToolCall[] = [];
   const requestIdToIndex = new Map<string, number>();
 
-  // Create mapping from requestId to original index for ordering
+  // Create mapping from requestId to original index for ordering (including unknown tools)
   toolCalls.forEach((toolCall, index) => {
     requestIdToIndex.set(toolCall.requestId, index);
   });
 
-  for await (const result of runToolBatchConcurrent(toolCalls, toolContext)) {
+  // Add unknown tool results first
+  unknownToolResults.forEach(result => {
+    const originalIndex = requestIdToIndex.get(result.requestId)!;
+    results[originalIndex] = result;
+  });
+
+  // Execute known tools concurrently
+  for await (const result of runToolBatchConcurrent(knownTools, toolContext)) {
     // Debug assertion: readonly tools should never require permission
     if (result.status === "permission_required") {
       // For concurrent execution, simplify by throwing an error
@@ -207,6 +256,33 @@ async function executeToolsSequentially(
   const results: ToolCall[] = [];
 
   for (let i = 0; i < toolCalls.length; i++) {
+    const toolCallToExecute = toolCalls[i];
+
+    // Check if this is an unknown tool
+    if (toolCallToExecute.unknownTool) {
+      // Notify tool start
+      const executingCall: ToolCallRunning = {
+        ...toolCallToExecute,
+        status: "executing" as const,
+      };
+      callbacks.onToolStart?.(executingCall);
+
+      // Create error result for unknown tool
+      const errorResult: ToolCall = {
+        ...toolCallToExecute,
+        status: "error" as const,
+        endedAt: new Date().toISOString(),
+        result: {
+          isError: true,
+          message: `Unknown tool: ${toolCallToExecute.toolName}`,
+        },
+      };
+
+      results[i] = errorResult;
+      callbacks.onToolComplete?.(errorResult);
+      continue;
+    }
+
     // Check for abort
     if (context.signal?.aborted) {
       // Mark remaining tools as aborted
@@ -229,7 +305,6 @@ async function executeToolsSequentially(
       }
       break;
     }
-    const toolCallToExecute = toolCalls[i];
 
     // Notify tool start
     const executingCall: ToolCallRunning = {

@@ -891,6 +891,60 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         },
       },
 
+      // Unknown tools - error scenarios
+      // fileWrite - error (unknown tool)
+      {
+        toolName: "fileWrite",
+        requestId: "fileWrite-unknown",
+        status: "error",
+        input: { filePath: "/tmp/test.txt", content: "test content" },
+        startedAt: new Date(Date.now() - 0.001).toISOString(),
+        endedAt: new Date(Date.now() - 0.0005).toISOString(),
+        result: {
+          isError: true,
+          message: "Unknown tool: fileWrite",
+        },
+      },
+      // fileCreate - error (unknown tool)
+      {
+        toolName: "fileCreate",
+        requestId: "fileCreate-unknown",
+        status: "error",
+        input: { filePath: "/tmp/new.txt", content: "new content" },
+        startedAt: new Date(Date.now() - 0.0008).toISOString(),
+        endedAt: new Date(Date.now() - 0.0003).toISOString(),
+        result: {
+          isError: true,
+          message: "Unknown tool: fileCreate",
+        },
+      },
+      // deploy - error (unknown tool)
+      {
+        toolName: "deploy",
+        requestId: "deploy-unknown",
+        status: "error",
+        input: { environment: "production", service: "api" },
+        startedAt: new Date(Date.now() - 0.0007).toISOString(),
+        endedAt: new Date(Date.now() - 0.0002).toISOString(),
+        result: {
+          isError: true,
+          message: "Unknown tool: deploy",
+        },
+      },
+      // sendEmail - error (unknown tool)
+      {
+        toolName: "sendEmail",
+        requestId: "sendEmail-unknown",
+        status: "error",
+        input: { to: "user@example.com", subject: "Test", body: "Test email" },
+        startedAt: new Date(Date.now() - 0.0006).toISOString(),
+        endedAt: new Date(Date.now() - 0.0001).toISOString(),
+        result: {
+          isError: true,
+          message: "Unknown tool: sendEmail",
+        },
+      },
+
     ];
 
     // Create assistant message with comprehensive tool calls
@@ -901,7 +955,7 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
         message: {
           role: "assistant",
           content:
-            "Here are comprehensive examples of all tools with different terminal states:",
+            "Here are comprehensive examples of all tools with different terminal states, including unknown tools that result in errors:",
           tool_calls: [
             // bash tools
             {
@@ -1195,6 +1249,40 @@ export function Avatar({ src, alt, size = 'medium', className }: AvatarProps) {
                 name: "todo_write",
                 arguments:
                   '{"todos": [{"id": "bulk", "content": "Bulk todo item", "status": "pending", "priority": "medium"}]}',
+              },
+            },
+
+            // Unknown tools
+            {
+              id: "fileWrite-unknown",
+              type: "function",
+              function: {
+                name: "fileWrite",
+                arguments: '{"filePath": "/tmp/test.txt", "content": "test content"}',
+              },
+            },
+            {
+              id: "fileCreate-unknown",
+              type: "function",
+              function: {
+                name: "fileCreate",
+                arguments: '{"filePath": "/tmp/new.txt", "content": "new content"}',
+              },
+            },
+            {
+              id: "deploy-unknown",
+              type: "function",
+              function: {
+                name: "deploy",
+                arguments: '{"environment": "production", "service": "api"}',
+              },
+            },
+            {
+              id: "sendEmail-unknown",
+              type: "function",
+              function: {
+                name: "sendEmail",
+                arguments: '{"to": "user@example.com", "subject": "Test", "body": "Test email"}',
               },
             },
 

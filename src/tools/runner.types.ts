@@ -84,6 +84,8 @@ type ToolCallBase = {
   startedAt: string;
   endedAt?: string;
   input: Record<string, unknown>;
+  /** Flag indicating if this is an unknown tool (not found in tool registry) */
+  unknownTool?: boolean;
 };
 
 export type ToolCallResultSuccess = {
