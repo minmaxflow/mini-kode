@@ -42,6 +42,7 @@ This optimization allows read operations to happen in parallel while ensuring wr
 | `architect`  | Read-only | Generate plans (LLM) | No                  |
 | `todo_read`  | Read-only | Read tasks           | No                  |
 | `todo_write` | Read-only | Update tasks         | No                  |
+| `fetch`      | Read-only | Fetch web content    | Yes                 |
 | `MCP Tools`  | Dynamic   | External MCP servers | Yes                 |
 
 ## How Tools Work
