@@ -60,6 +60,7 @@
     "openai": "^5.23.1",
     "react": "^19.2.0",
     "react-devtools-core": "^6.1.2",
+    "turndown": "^7.2.2",
     "use-effect-event": "^2.0.3",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.24.6"
