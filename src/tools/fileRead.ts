@@ -33,7 +33,9 @@ The file_path parameter must be an absolute path, not a relative path.
 By default, it reads up to 2000 lines starting from the beginning of the file. 
 
 You can optionally specify a line offset and limit (especially handy for long files), 
-but it's recommended to read the whole file by not providing these parameters. 
+but it's STRONGLY recommended to read the whole file by not providing these parameters. 
+Reading the entire file ensures you have complete context and prevents editing errors.
+
 Any lines longer than 2000 characters will be truncated.
 `.trim();
 
@@ -88,7 +90,8 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
       if (!isTextFile(absolute)) {
         return {
           isError: true,
-          message: "File contains binary or non-text content and cannot be read as text",
+          message:
+            "File contains binary or non-text content and cannot be read as text",
           filePath: absolute,
         };
       }
