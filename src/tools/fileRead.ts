@@ -6,6 +6,7 @@ import { isPathUnderPrefix } from "../permissions";
 import { Tool, FileReadResult, ToolExecutionContext } from "./types";
 import { noteFileReadForEdit } from "./fileEdit";
 import { limitText } from "./limitUtils";
+import { isTextFile } from "../utils/file-type";
 
 const InputSchema = z.object({
   filePath: z.string().describe("The absolute path to the file to read"),
@@ -83,7 +84,17 @@ export const FileReadTool: Tool<FileReadInput, FileReadResult> = {
           message: "Aborted",
           filePath: absolute,
         };
+      // Validate that file is a text file
+      if (!isTextFile(absolute)) {
+        return {
+          isError: true,
+          message: "File contains binary or non-text content and cannot be read as text",
+          filePath: absolute,
+        };
+      }
+
       const raw = fs.readFileSync(absolute, "utf8");
+
       // Record read to enable safe read-before-write flow for FileEditTool
       noteFileReadForEdit(absolute, raw);
 
