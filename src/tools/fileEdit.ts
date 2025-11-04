@@ -140,6 +140,7 @@ export const FileEditTool: Tool<FileEditInput, FileEditResult> = {
       const dir = path.dirname(abs);
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(abs, input.new_string, "utf8");
+      noteFileReadForEdit(abs, input.new_string);
       return {
         filePath: abs,
         mode: "create",
