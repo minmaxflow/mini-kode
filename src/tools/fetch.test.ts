@@ -68,7 +68,7 @@ describe("FetchTool", () => {
 
     const success = result as any;
     expect(success.url).toBe("https://example.com");
-    expect(success.mimeType).toBe("text/html");
+    expect(success.mimeType).toBe("text/markdown");
     expect(success.content).toContain("Hello World");
     expect(success.content).toContain("Test content");
   });

@@ -37,7 +37,7 @@ test("FetchResultView renders markdown content", () => {
 });
 
 test("FetchResultView truncates long content", () => {
-  const longContent = Array(10).fill("Line of content").join("\n");
+  const longContent = Array(10).fill(null).map((_, i) => `Line of content ${i}`).join("\n");
   const mockResult: FetchSuccess = {
     url: "https://example.com",
     content: longContent,
@@ -49,10 +49,10 @@ test("FetchResultView truncates long content", () => {
   );
 
   expect(lastFrame()).toContain("https://example.com");
-  expect(lastFrame()).toContain("Line of content");
+  expect(lastFrame()).toContain("Line of content 0");
   expect(lastFrame()).toContain("… +5 lines");
   // Should only show first 5 lines when truncated
-  expect(lastFrame()).not.toContain(longContent.split("\n")[6]);
+  expect(lastFrame()).not.toContain("Line of content 5");
 });
 
 test("FetchResultView shows (No content) for empty content", () => {
