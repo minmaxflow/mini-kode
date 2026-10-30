@@ -126,7 +126,7 @@ async function expectRequest(
 
 describe.each([
   ["global", "https://api.minimax.io/v1"],
-  ["cn", "https://api.minimax.cn/v1"],
+  ["cn", "https://api.minimaxi.com/v1"],
 ])("MiniMax %s serialized requests", (region, baseURL) => {
   beforeEach(() => vi.stubEnv("MINIMAX_REGION", region));
 
@@ -197,7 +197,7 @@ it("preserves explicit custom endpoint, model and planning overrides", async () 
   await expectRequest("custom-model", "https://example.com/v1");
 });
 
-it("retains a saved legacy China endpoint and model", async () => {
+it("retains a saved China endpoint and model", async () => {
   vi.stubEnv("MINIMAX_REGION", "cn");
   savedConfig = {
     llm: { baseURL: "https://api.minimaxi.com/v1", model: "MiniMax-M2.7" },

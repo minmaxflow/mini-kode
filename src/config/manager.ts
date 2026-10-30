@@ -54,7 +54,7 @@ const API_PRESETS = {
     planModel: "MiniMax-M3.1-Flash",
   },
   minimaxCn: {
-    baseURL: "https://api.minimax.cn/v1",
+    baseURL: "https://api.minimaxi.com/v1",
     model: "MiniMax-M3.1-Flash",
     planModel: "MiniMax-M3.1-Flash",
   },
@@ -147,10 +147,7 @@ function loadFromEnvironment(globalConfig: GlobalConfig): {
     // Preset defaults must not replace saved settings for the selected region.
     const savedBaseURL = globalConfig.llm?.baseURL?.replace(/\/+$/, "");
     const saved =
-      savedBaseURL === preset.baseURL ||
-      (region === "cn" && savedBaseURL === "https://api.minimaxi.com/v1")
-        ? globalConfig.llm
-        : undefined;
+      savedBaseURL === preset.baseURL ? globalConfig.llm : undefined;
     return {
       baseURL: saved?.baseURL || preset.baseURL,
       model: model || (saved?.model ? undefined : preset.model),
