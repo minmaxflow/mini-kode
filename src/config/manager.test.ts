@@ -20,6 +20,9 @@ beforeEach(() => {
   delete process.env.DEEPSEEK_API_KEY;
   delete process.env.OPENAI_API_KEY;
   delete process.env.GLM_API_KEY;
+  delete process.env.MINIMAX_API_KEY;
+  delete process.env.MINIMAX_REGION;
+  delete process.env.MINIMAX_MODEL;
 
   // Backup and override config path
   process.env.MINI_KODE_TEST_CONFIG_DIR = testConfigDir;
@@ -73,6 +76,44 @@ describe("ConfigManager", () => {
       expect(config.llm.modelSource).toBe("env");
       expect(config.llm.planModelSource).toBe("env");
       expect(config.llm.apiKeySource).toBe("env");
+    });
+
+    it("should auto-detect MiniMax API key with the global preset", () => {
+      process.env.MINIMAX_API_KEY = "minimax-key";
+
+      const config = ConfigManager.load();
+
+      expect(config.llm.baseURL).toBe("https://api.minimax.io/v1");
+      expect(config.llm.model).toBe("MiniMax-M3.1-Flash");
+      expect(config.llm.planModel).toBe("MiniMax-M3.1-Flash");
+      expect(config.llm.apiKey).toBe("minimax-key");
+
+      expect(config.llm.baseURLSource).toBe("env");
+      expect(config.llm.modelSource).toBe("env");
+      expect(config.llm.planModelSource).toBe("env");
+      expect(config.llm.apiKeySource).toBe("env");
+    });
+
+    it("should use the MiniMax China preset when MINIMAX_REGION=cn", () => {
+      process.env.MINIMAX_API_KEY = "minimax-key";
+      process.env.MINIMAX_REGION = "cn";
+
+      const config = ConfigManager.load();
+
+      expect(config.llm.baseURL).toBe("https://api.minimaxi.com/v1");
+      expect(config.llm.model).toBe("MiniMax-M3.1-Flash");
+      expect(config.llm.apiKey).toBe("minimax-key");
+    });
+
+    it("should honor MINIMAX_MODEL when auto-detecting MiniMax", () => {
+      process.env.MINIMAX_API_KEY = "minimax-key";
+      process.env.MINIMAX_MODEL = "MiniMax-M2.7";
+
+      const config = ConfigManager.load();
+
+      expect(config.llm.baseURL).toBe("https://api.minimax.io/v1");
+      expect(config.llm.model).toBe("MiniMax-M2.7");
+      expect(config.llm.planModel).toBe("MiniMax-M2.7");
     });
   });
 

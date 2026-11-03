@@ -36,6 +36,7 @@ export function LLMInfoDisplay() {
     if (baseURL.includes("deepseek.com")) return "DeepSeek";
     if (baseURL.includes("openai.com")) return "OpenAI";
     if (baseURL.includes("bigmodel.cn")) return "GLM (Zhipu AI)";
+    if (baseURL.includes("minimax")) return "MiniMax";
     return "Custom";
   };
 

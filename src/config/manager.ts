@@ -48,6 +48,16 @@ const API_PRESETS = {
     model: "glm-4.6",
     planModel: "glm-4.6",
   },
+  minimax: {
+    baseURL: "https://api.minimax.io/v1",
+    model: "MiniMax-M3.1-Flash",
+    planModel: "MiniMax-M3.1-Flash",
+  },
+  minimaxCn: {
+    baseURL: "https://api.minimaxi.com/v1",
+    model: "MiniMax-M3.1-Flash",
+    planModel: "MiniMax-M3.1-Flash",
+  },
 } as const;
 
 /**
@@ -67,11 +77,12 @@ const DEFAULT_CONFIG = {
  *
  * Priority:
  * 1. MINIKODE_* variables (explicit user configuration)
- * 2. Provider-specific auto-detection (DEEPSEEK_API_KEY, OPENAI_API_KEY)
+ * 2. Provider-specific auto-detection (DEEPSEEK_API_KEY, OPENAI_API_KEY,
+ *    GLM_API_KEY, MINIMAX_API_KEY)
  *
  * Returns a complete configuration object or null if no env config available.
  */
-function loadFromEnvironment(): {
+function loadFromEnvironment(globalConfig: GlobalConfig): {
   baseURL: string | undefined;
   model: string | undefined;
   planModel: string | undefined;
@@ -123,6 +134,27 @@ function loadFromEnvironment(): {
       model: API_PRESETS.glm.model,
       planModel: API_PRESETS.glm.planModel,
       apiKey: glmKey.trim(),
+    };
+  }
+
+  const minimaxKey = process.env.MINIMAX_API_KEY;
+  if (minimaxKey?.trim()) {
+    // Default to the global endpoint; set MINIMAX_REGION=cn for mainland China.
+    const region = process.env.MINIMAX_REGION?.trim().toLowerCase();
+    const preset =
+      region === "cn" ? API_PRESETS.minimaxCn : API_PRESETS.minimax;
+    const model = process.env.MINIMAX_MODEL?.trim();
+    // Preset defaults must not replace saved settings for the selected region.
+    const savedBaseURL = globalConfig.llm?.baseURL?.replace(/\/+$/, "");
+    const saved =
+      savedBaseURL === preset.baseURL ? globalConfig.llm : undefined;
+    return {
+      baseURL: saved?.baseURL || preset.baseURL,
+      model: model || (saved?.model ? undefined : preset.model),
+      planModel:
+        model ||
+        (saved?.planModel || saved?.model ? undefined : preset.planModel),
+      apiKey: minimaxKey.trim(),
     };
   }
 
@@ -280,7 +312,7 @@ export class ConfigManager {
   static load(): EffectiveConfig {
     // Load configuration from all sources
     const globalConfig = readGlobalConfig();
-    const envConfig = loadFromEnvironment();
+    const envConfig = loadFromEnvironment(globalConfig);
 
     // Resolve LLM configuration
     const resolvedBaseURL = resolveWithSources({

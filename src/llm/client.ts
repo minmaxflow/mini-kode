@@ -107,6 +107,7 @@ export async function* streamChatCompletion(
 
   // Accumulate message content and tool calls
   let accumulatedContent = "";
+  let accumulatedReasoning = "";
   const accumulatedToolCalls = new Map<number, ChatCompletionMessageToolCall>();
   let finishReason: ChatFinishReason | null = null;
   let tokenUsage: TokenUsage | null = null;
@@ -133,6 +134,13 @@ export async function* streamChatCompletion(
     const content = delta?.content;
     if (content) {
       accumulatedContent += content;
+    }
+
+    // Preserve separate reasoning for subsequent turns, including tool results.
+    const reasoning = (delta as { reasoning_content?: string } | undefined)
+      ?.reasoning_content;
+    if (reasoning) {
+      accumulatedReasoning += reasoning;
     }
 
     // Handle tool calls delta
@@ -170,7 +178,9 @@ export async function* streamChatCompletion(
 
     // Always build a complete message (even during streaming)
     // the content is always string, but we can not force this at type level
-    let completeMessage: ChatCompletionAssistantMessageParam;
+    let completeMessage: ChatCompletionAssistantMessageParam & {
+      reasoning_content?: string;
+    };
     let parsedToolCalls: ParsedToolCall[] = [];
 
     if (accumulatedToolCalls.size > 0) {
@@ -215,6 +225,10 @@ export async function* streamChatCompletion(
         role: "assistant",
         content: content,
       };
+    }
+
+    if (accumulatedReasoning) {
+      completeMessage.reasoning_content = accumulatedReasoning;
     }
 
     // Always yield when there's content or the stream is complete
